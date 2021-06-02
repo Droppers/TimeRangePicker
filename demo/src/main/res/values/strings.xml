@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name" translatable="false">TimeRangePicker</string>
+    <string name="sleep" translatable="false">Sleep at</string>
+    <string name="wake" translatable="false">Wake at</string>
+    <string name="duration" translatable="false">You will sleep for %1$s</string>
+
+    <string name="example_one">Example 1</string>
+    <string name="example_two">Example 2</string>
+    <string name="example_three">Example 3</string>
+
+    <string name="set_property_value">Set %1$s value</string>
+    <string name="apply">Apply</string>
+    <string name="pick_color">Pick a color</string>
+
+    <string name="copied_xml_clipboard">Copied XML to clipboard</string>
+    <string name="copy_to_clipboard">Copy to clipboard</string>
+    <string name="generate_xml_title">Generated XML</string>
+
+    <string name="generate_xml">Generate XML</string>
+    <string name="show_examples">Show examples</string>
+</resources>
