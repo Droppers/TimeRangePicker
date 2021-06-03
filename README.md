@@ -3,7 +3,7 @@
 [![API](https://img.shields.io/badge/API-14%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=14) 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A customizable, easy-to-use, and functional circular time range picker library for Android. You can use this library to mimic Apple's iOS or Samsung's circular bedtime picker.
+A customizable, easy-to-use, and functional circular time range picker library for Android. Use this library to mimic Apple's iOS or Samsung's bedtime picker.
 
 ## Examples
 <table>
