@@ -75,7 +75,7 @@ class TimeRangePicker @JvmOverloads constructor(
 
     private var _minDurationMinutes: Int = 0
     private var _maxDurationMinutes: Int = 24 * 60
-    private var _timeStepMinutes = 10
+    private var _stepTimeMinutes = 10
 
     private var onTimeChangeListener: OnTimeChangeListener? = null
     private var onDragChangeListener: OnDragChangeListener? = null
@@ -174,9 +174,9 @@ class TimeRangePicker @JvmOverloads constructor(
                 maxDurationMinutes = parseTimeString(maxDuration).totalMinutes
             }
 
-            _timeStepMinutes = attr.getInt(
+            _stepTimeMinutes = attr.getInt(
                 R.styleable.TimeRangePicker_trp_stepTimeMinutes,
-                _timeStepMinutes
+                _stepTimeMinutes
             )
 
             // Slider
@@ -668,7 +668,7 @@ class TimeRangePicker @JvmOverloads constructor(
 
     var startTimeMinutes: Int
         get() = snapMinutes(
-            angleToMinutes(_angleStart, _hourFormat), _timeStepMinutes
+            angleToMinutes(_angleStart, _hourFormat), _stepTimeMinutes
         )
         set(value) {
             _angleStart = minutesToAngle(value, _hourFormat)
@@ -686,7 +686,7 @@ class TimeRangePicker @JvmOverloads constructor(
 
     var endTimeMinutes: Int
         get() = snapMinutes(
-            angleToMinutes(_angleEnd, _hourFormat), _timeStepMinutes
+            angleToMinutes(_angleEnd, _hourFormat), _stepTimeMinutes
         )
         set(value) {
             _angleEnd = minutesToAngle(value, _hourFormat)
@@ -755,14 +755,14 @@ class TimeRangePicker @JvmOverloads constructor(
             }
         }
 
-    var timeStepMinutes
-        get() = _timeStepMinutes
+    var stepTimeMinutes
+        get() = _stepTimeMinutes
         set(value) {
             if (value > 24 * 60) {
                 throw IllegalArgumentException("Minutes per step cannot be above 24 hours (24 * 60).")
             }
 
-            _timeStepMinutes = value
+            _stepTimeMinutes = value
             postInvalidate()
         }
 
