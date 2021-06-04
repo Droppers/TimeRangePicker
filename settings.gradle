@@ -1,0 +1,3 @@
+include ':timerangepicker'
+include ':demo'
+rootProject.name = "TimeRangePicker"

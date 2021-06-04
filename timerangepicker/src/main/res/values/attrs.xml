@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TimeRangePicker">
+        <!-- Time  -->
+        <attr name="trp_hourFormat" format="enum">
+            <enum name="FORMAT_SYSTEM" value="0" />
+            <enum name="FORMAT_12" value="1" />
+            <enum name="FORMAT_24" value="2" />
+        </attr>
+        <attr name="trp_startTime" format="string" /> <!-- Format: h:mm -->
+        <attr name="trp_startTimeMinutes" format="integer" />
+        <attr name="trp_endTime" format="string" /> <!-- Format: h:mm -->
+        <attr name="trp_endTimeMinutes" format="integer" />
+        <attr name="trp_minDuration" format="string" /> <!-- Format: h:mm -->
+        <attr name="trp_minDurationMinutes" format="string" />
+        <attr name="trp_maxDurationMinutes" format="string" />
+        <attr name="trp_maxDuration" format="string" /> <!-- Format: h:mm -->
+        <attr name="trp_stepTimeMinutes" format="integer" />
+
+        <!-- Slider -->
+        <attr name="trp_sliderWidth" format="dimension" />
+        <attr name="trp_sliderColor" format="color" />
+        <attr name="trp_sliderRangeColor" format="color" />
+        <attr name="trp_sliderRangeGradientStart" format="color" />
+        <attr name="trp_sliderRangeGradientMiddle" format="color" />
+        <attr name="trp_sliderRangeGradientEnd" format="color" />
+
+        <!-- Handle -->
+        <attr name="trp_thumbIconStart" format="reference" />
+        <attr name="trp_thumbIconEnd" format="reference" />
+        <attr name="trp_thumbSize" format="dimension" />
+        <attr name="trp_thumbSizeActiveGrow" format="float" />
+        <attr name="trp_thumbColor" format="color" />
+        <attr name="trp_thumbIconColor" format="color" />
+        <attr name="trp_thumbIconSize" format="dimension" />
+
+        <!-- Clock -->
+        <attr name="trp_clockVisible" format="boolean" />
+        <attr name="trp_clockFace" format="enum">
+            <enum name="APPLE" value="0" />
+            <enum name="SAMSUNG" value="1" />
+        </attr>
+        <attr name="trp_clockLabelSize" format="dimension" />
+        <attr name="trp_clockLabelColor" format="color" />
+        <attr name="trp_clockTickColor" format="color" />
+    </declare-styleable>
+</resources>

@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/tab_one"
+        android:icon="@drawable/numeric_1_box_outline"
+        android:title="@string/example_one" />
+    <item
+        android:id="@+id/tab_two"
+        android:icon="@drawable/numeric_2_box_outline"
+        android:title="@string/example_two" />
+    <item
+        android:id="@+id/tab_three"
+        android:icon="@drawable/numeric_3_box_outline"
+        android:title="@string/example_three" />
+</menu>
