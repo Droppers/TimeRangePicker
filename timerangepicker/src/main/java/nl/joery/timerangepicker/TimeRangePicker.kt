@@ -680,7 +680,7 @@ class TimeRangePicker @JvmOverloads constructor(
             endTimeMinutes
         )
         set(value) {
-            _angleStart = minutesToAngle(value.totalMinutes, _hourFormat)
+            _angleEnd = minutesToAngle(value.totalMinutes, _hourFormat)
             postInvalidate()
         }
 
