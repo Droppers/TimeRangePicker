@@ -16,7 +16,9 @@ A customizable, easy-to-use, and functional circular time range picker library f
 ## Playground app
 <img src="./art/playground-demo.png" width="400" />
 
-Download the playground app: [demo.apk](./art/demo.apk). In this app, you can try out all features and even generate XML layouts.
+Download the playground app from Google Play, with this app you can try out all features and even generate XML with your selected configuration.
+
+<a href="https://play.google.com/store/apps/details?id=nl.joery.demo.timerangepicker"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" width="200" /></a>
 
 ## Contents
 - [Getting started](#getting-started)
