@@ -6,7 +6,6 @@ import nl.joery.timerangepicker.utils.px
 import kotlin.math.cos
 import kotlin.math.sin
 
-
 internal class ClockRenderer(private val timeRangePicker: TimeRangePicker) {
     private val _minuteTickWidth = 1.px
     private val _hourTickWidth = 2.px
@@ -48,67 +47,85 @@ internal class ClockRenderer(private val timeRangePicker: TimeRangePicker) {
         drawLabels(canvas, radius)
     }
 
+    private val drawTicksPosition = PointF()
+
     private fun drawTicks(canvas: Canvas, radius: Float) {
         val hourTickInterval = if(timeRangePicker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) 24 else 12
+        val tickLength = _tickLength
+        val tickCount = _tickCount
+        val hourTick = tickCount / hourTickInterval
+        val offset = if(timeRangePicker.clockLabelSize.dp <= 16) 3 else 6
+        val anglePerTick = 360f / tickCount
 
-        for (i in 0 until _tickCount) {
-            val angle = 360f / _tickCount * i
+        for (i in 0 until tickCount) {
+            val angle = anglePerTick * i
 
-            val start = getPositionByAngle(radius, angle)
-            val stop = getPositionByAngle(radius - _tickLength, angle)
+            getPositionByAngle(radius, angle, drawTicksPosition)
+            val startX = drawTicksPosition.x
+            val startY = drawTicksPosition.y
 
-            val offset = if(timeRangePicker.clockLabelSize.dp <= 16) 3 else 6
+            getPositionByAngle(radius - tickLength, angle, drawTicksPosition)
+
+            val stopX = drawTicksPosition.x
+            val stopY = drawTicksPosition.y
+
             if (timeRangePicker.clockFace == TimeRangePicker.ClockFace.SAMSUNG &&
                 ((angle >= 90-offset && angle <= 90+offset) ||
-                (angle >= 180-offset && angle <= 180+offset) ||
-                (angle >= 270-offset && angle <= 270+offset) ||
-                angle >= 360-offset ||
-                angle <= 0+offset)) {
+                        (angle >= 180-offset && angle <= 180+offset) ||
+                        (angle >= 270-offset && angle <= 270+offset) ||
+                        angle >= 360-offset ||
+                        angle <= 0+offset)) {
                 continue
             }
 
             // Hour tick
-            if (i % (_tickCount / hourTickInterval) == 0) {
+            if (i % hourTick == 0) {
                 _tickPaint.alpha = 180
                 _tickPaint.strokeWidth = _hourTickWidth.toFloat()
             } else {
                 _tickPaint.alpha = 100
                 _tickPaint.strokeWidth = _minuteTickWidth.toFloat()
             }
-            canvas.drawLine(start.x, start.y, stop.x, stop.y, _tickPaint)
+            canvas.drawLine(startX, startY, stopX, stopY, _tickPaint)
         }
     }
+
+    private val drawLabelsBounds = Rect()
+    private val drawLabelsPosition = PointF()
 
     private fun drawLabels(canvas: Canvas, radius: Float) {
         val labels = when (timeRangePicker.clockFace) {
             TimeRangePicker.ClockFace.APPLE -> {
                 if (timeRangePicker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) {
-                    arrayOf("0", "2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22")
+                    LABELS_APPLE_24
                 } else {
-                    arrayOf("12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")
+                    LABELS_APPLE_12
                 }
             }
             TimeRangePicker.ClockFace.SAMSUNG -> {
                 if (timeRangePicker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) {
-                    arrayOf("0", "6", "12", "18")
+                    LABELS_SAMSUNG_24
                 } else {
-                    arrayOf("12", "3", "6", "9")
+                    LABELS_SAMSUNG_12
                 }
             }
         }
+
+        val bounds = drawLabelsBounds
+        val position = drawLabelsPosition
+        val tickLength = _tickLength.toFloat()
 
         for (i in labels.indices) {
             val label = labels[i]
             val angle = 360f / labels.size * i - 90f
 
-            val bounds = Rect()
             _labelPaint.getTextBounds(label, 0, label.length, bounds)
             val offset = when (timeRangePicker.clockFace) {
-                TimeRangePicker.ClockFace.APPLE -> _tickLength.toFloat() * 2 + bounds.height()
+                TimeRangePicker.ClockFace.APPLE -> tickLength * 2 + bounds.height()
                 TimeRangePicker.ClockFace.SAMSUNG -> (if(angle == 0f || angle == 180f) bounds.width() else bounds.height()).toFloat() / 2
             }
-            val position =
-                getPositionByAngle(radius - offset, angle)
+
+            getPositionByAngle(radius - offset, angle, position)
             canvas.drawText(
                 label,
                 position.x,
@@ -118,13 +135,17 @@ internal class ClockRenderer(private val timeRangePicker: TimeRangePicker) {
         }
     }
 
-    private fun getPositionByAngle(
-        radius: Float,
-        angle: Float
-    ): PointF {
-        return PointF(
-            (_middle.x + radius * cos(Math.toRadians(angle.toDouble()))).toFloat(),
-            (_middle.y + radius * sin(Math.toRadians(angle.toDouble()))).toFloat()
-        )
+    private fun getPositionByAngle(radius: Float, angle: Float, outPoint: PointF) {
+        val angleRadians = Math.toRadians(angle.toDouble())
+        outPoint.x = _middle.x + radius * cos(angleRadians).toFloat()
+        outPoint.y = _middle.y + radius * sin(angleRadians).toFloat()
+    }
+
+    companion object {
+        private val LABELS_APPLE_24 = arrayOf("0", "2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22")
+        private val LABELS_APPLE_12 =  arrayOf("12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")
+
+        private val LABELS_SAMSUNG_24 = arrayOf("0", "6", "12", "18")
+        private val LABELS_SAMSUNG_12 = arrayOf("12", "3", "6", "9")
     }
 }
