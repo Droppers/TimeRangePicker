@@ -143,24 +143,24 @@ class TimeRangePicker @JvmOverloads constructor(
             _angleStart = minutesToAngle(
                 attr.getInt(
                     R.styleable.TimeRangePicker_trp_endTimeMinutes,
-                    angleToMinutes(minutesToAngle(Time(0, 0).totalMinutes, _hourFormat), _hourFormat)
+                    angleToMinutes(minutesToAngle(0, _hourFormat), _hourFormat)
                 ),
                 _hourFormat
             )
             _angleEnd = minutesToAngle(
                 attr.getInt(
                     R.styleable.TimeRangePicker_trp_startTimeMinutes,
-                    angleToMinutes(minutesToAngle(Time(8, 0).totalMinutes, _hourFormat), _hourFormat)
+                    angleToMinutes(minutesToAngle(480 /* 8:00 */, _hourFormat), _hourFormat)
                 ),
                 _hourFormat
             )
             val startTime = attr.getString(R.styleable.TimeRangePicker_trp_startTime)
             if (startTime != null) {
-                _angleStart = minutesToAngle(Time.parse(startTime).totalMinutes, _hourFormat)
+                _angleStart = minutesToAngle(Time.parseToTotalMinutes(startTime), _hourFormat)
             }
             val endTime = attr.getString(R.styleable.TimeRangePicker_trp_endTime)
             if (endTime != null) {
-                _angleEnd = minutesToAngle(Time.parse(endTime).totalMinutes, _hourFormat)
+                _angleEnd = minutesToAngle(Time.parseToTotalMinutes(endTime), _hourFormat)
             }
 
             // Duration
@@ -169,11 +169,11 @@ class TimeRangePicker @JvmOverloads constructor(
 
             val minDuration = attr.getString(R.styleable.TimeRangePicker_trp_minDuration)
             if (minDuration != null) {
-                minDurationMinutes = Time.parse(minDuration).totalMinutes
+                minDurationMinutes = Time.parseToTotalMinutes(minDuration)
             }
             val maxDuration = attr.getString(R.styleable.TimeRangePicker_trp_maxDuration)
             if (maxDuration != null) {
-                maxDurationMinutes = Time.parse(maxDuration).totalMinutes
+                maxDurationMinutes = Time.parseToTotalMinutes(maxDuration)
             }
 
             _stepTimeMinutes = attr.getInt(
@@ -1041,11 +1041,15 @@ class TimeRangePicker @JvmOverloads constructor(
 
         companion object {
             fun parse(time: String): Time {
+                return Time(parseToTotalMinutes(time))
+            }
+
+            internal fun parseToTotalMinutes(str: String): Int {
                 fun throwInvalidFormat(): Nothing {
-                    throw IllegalArgumentException("Format of time value '$time' is invalid, expected format hh:mm.")
+                    throw IllegalArgumentException("Format of time value '$str' is invalid, expected format hh:mm.")
                 }
 
-                val colonIdx = time.indexOf(':')
+                val colonIdx = str.indexOf(':')
 
                 if(colonIdx < 0) {
                     throwInvalidFormat()
@@ -1055,8 +1059,8 @@ class TimeRangePicker @JvmOverloads constructor(
                 val minute: Int
 
                 try {
-                    hour = time.parsePositiveInt(0, colonIdx)
-                    minute = time.parsePositiveInt(colonIdx + 1, time.length)
+                    hour = str.parsePositiveInt(0, colonIdx)
+                    minute = str.parsePositiveInt(colonIdx + 1, str.length)
                 } catch (e: Exception) {
                     throwInvalidFormat()
                 }
@@ -1065,7 +1069,7 @@ class TimeRangePicker @JvmOverloads constructor(
                     throwInvalidFormat()
                 }
 
-                return Time(hour, minute)
+                return hour * 60 + minute
             }
         }
     }
