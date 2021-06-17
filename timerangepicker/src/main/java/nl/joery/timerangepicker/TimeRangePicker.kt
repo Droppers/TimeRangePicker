@@ -154,11 +154,11 @@ class TimeRangePicker @JvmOverloads constructor(
             )
             val startTime = attr.getString(R.styleable.TimeRangePicker_trp_startTime)
             if (startTime != null) {
-                _angleStart = minutesToAngle(parseTimeString(startTime).totalMinutes, _hourFormat)
+                _angleStart = minutesToAngle(Time.parse(startTime).totalMinutes, _hourFormat)
             }
             val endTime = attr.getString(R.styleable.TimeRangePicker_trp_endTime)
             if (endTime != null) {
-                _angleEnd = minutesToAngle(parseTimeString(endTime).totalMinutes, _hourFormat)
+                _angleEnd = minutesToAngle(Time.parse(endTime).totalMinutes, _hourFormat)
             }
 
             // Duration
@@ -167,11 +167,11 @@ class TimeRangePicker @JvmOverloads constructor(
 
             val minDuration = attr.getString(R.styleable.TimeRangePicker_trp_minDuration)
             if (minDuration != null) {
-                minDurationMinutes = parseTimeString(minDuration).totalMinutes
+                minDurationMinutes = Time.parse(minDuration).totalMinutes
             }
             val maxDuration = attr.getString(R.styleable.TimeRangePicker_trp_maxDuration)
             if (maxDuration != null) {
-                maxDurationMinutes = parseTimeString(maxDuration).totalMinutes
+                maxDurationMinutes = Time.parse(maxDuration).totalMinutes
             }
 
             _stepTimeMinutes = attr.getInt(
@@ -621,15 +621,6 @@ class TimeRangePicker @JvmOverloads constructor(
         )
     }
 
-    private fun parseTimeString(time: String): Time {
-        if (!time.matches("^([0-1]?[0-9]|2[0-3]):[0-5][0-9]\$".toRegex())) {
-            throw IllegalArgumentException("Format of time value '$time' is invalid, expected format hh:mm.")
-        }
-
-        val split = time.split(":")
-        return Time(split[0].toInt(), split[1].toInt())
-    }
-
     fun setOnTimeChangeListener(onTimeChangeListener: OnTimeChangeListener) {
         this.onTimeChangeListener = onTimeChangeListener
     }
@@ -1015,6 +1006,36 @@ class TimeRangePicker @JvmOverloads constructor(
 
         override fun toString(): String {
             return "$hour:${minute.toString().padStart(2, '0')}"
+        }
+
+        companion object {
+            fun parse(time: String): Time {
+                fun throwInvalidFormat(): Nothing {
+                    throw IllegalArgumentException("Format of time value '$time' is invalid, expected format hh:mm.")
+                }
+
+                val colonIdx = time.indexOf(':')
+
+                if(colonIdx < 0) {
+                    throwInvalidFormat()
+                }
+
+                val hour: Int
+                val minute: Int
+
+                try {
+                    hour = time.parsePositiveInt(0, colonIdx)
+                    minute = time.parsePositiveInt(colonIdx + 1, time.length)
+                } catch (e: Exception) {
+                    throwInvalidFormat()
+                }
+
+                if(hour >= 24 || minute >= 60) {
+                    throwInvalidFormat()
+                }
+
+                return Time(hour, minute)
+            }
         }
     }
 
