@@ -279,28 +279,62 @@ class TimeRangePicker @JvmOverloads constructor(
         postInvalidate()
     }
 
+    private var gradientPositionsCache = FloatArray(2)
+    private var gradientColorsCache = IntArray(2)
+    private val gradientMatrixCache = Matrix()
+
     private fun updateGradient() {
+        fun resizeCacheIfNeeded(desiredSize: Int) {
+            if(gradientPositionsCache.size != desiredSize) {
+                gradientPositionsCache = FloatArray(desiredSize)
+            }
+
+            if(gradientColorsCache.size != desiredSize) {
+                gradientColorsCache = IntArray(desiredSize)
+            }
+        }
+
         if (!_isGradientSlider) {
             return
         }
 
-        val sweepAngle =
-            angleTo360(_angleStart - _angleEnd)
+        val sweepAngle = angleTo360(_angleStart - _angleEnd)
 
-        val positions = if (_sliderRangeGradientMiddle == null) {
-            floatArrayOf(0f, sweepAngle / 360f)
+        val positions: FloatArray
+        val colors: IntArray
+
+        val gradientStart = _sliderRangeGradientStart!!
+        val gradientEnd = _sliderRangeGradientEnd!!
+        val gradientMiddle = _sliderRangeGradientMiddle
+
+        if(gradientMiddle == null) {
+            resizeCacheIfNeeded(2)
+
+            positions = gradientPositionsCache
+            // first element is always 0
+            positions[1] = sweepAngle / 360f
+
+            colors = gradientColorsCache
+            colors[0] = gradientStart
+            colors[1] = gradientEnd
         } else {
-            floatArrayOf(0f, (sweepAngle / 360f) / 2, sweepAngle / 360f)
-        }
-        val colors = if (_sliderRangeGradientMiddle == null) {
-            intArrayOf(_sliderRangeGradientStart!!, _sliderRangeGradientEnd!!)
-        } else {
-            intArrayOf(_sliderRangeGradientStart!!, _sliderRangeGradientMiddle!!, _sliderRangeGradientEnd!!)
+            resizeCacheIfNeeded(3)
+
+            positions = gradientPositionsCache
+            // first element is always 0
+            positions[1] = (sweepAngle / 360f) / 2
+            positions[2] = sweepAngle / 360f
+
+            colors = gradientColorsCache
+            colors[0] = gradientStart
+            colors[1] = gradientMiddle
+            colors[2] = gradientEnd
         }
 
-        val gradient: Shader =
-            SweepGradient(_middlePoint.x, _middlePoint.y, colors, positions)
-        val gradientMatrix = Matrix()
+        val gradient: Shader = SweepGradient(_middlePoint.x, _middlePoint.y, colors, positions)
+        val gradientMatrix = gradientMatrixCache
+
+        gradientMatrix.reset()
         gradientMatrix.preRotate(-_angleStart, _middlePoint.x, _middlePoint.y)
         gradient.setLocalMatrix(gradientMatrix)
         _sliderRangePaint.shader = gradient
