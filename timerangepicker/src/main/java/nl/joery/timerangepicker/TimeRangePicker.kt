@@ -116,15 +116,21 @@ class TimeRangePicker @JvmOverloads constructor(
 
     private fun initColors() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            _sliderRangeColor = context.getColorResCompat(android.R.attr.colorPrimary)
-            _thumbColor = context.getColorResCompat(android.R.attr.colorPrimary)
+            val colorPrimary = context.getColorResCompat(android.R.attr.colorPrimary)
+
+            _sliderRangeColor = colorPrimary
+            _thumbColor = colorPrimary
         } else {
             _sliderRangeColor = Color.BLUE
             _thumbColor = Color.BLUE
         }
-        _sliderColor = Color.parseColor("#E1E1E1")
-        _clockTickColor = context.getTextColor(android.R.attr.textColorPrimary)
-        _clockLabelColor = context.getTextColor(android.R.attr.textColorPrimary)
+
+        _sliderColor = 0xFFE1E1E1.toInt()
+
+        val textColorPrimary = context.getTextColor(android.R.attr.textColorPrimary)
+
+        _clockTickColor = textColorPrimary
+        _clockLabelColor = textColorPrimary
     }
 
     private fun initAttributes(
