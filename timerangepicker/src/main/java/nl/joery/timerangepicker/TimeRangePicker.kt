@@ -103,7 +103,11 @@ class TimeRangePicker @JvmOverloads constructor(
     private val _isGradientSlider: Boolean
         get() = _sliderRangeGradientStart != null && _sliderRangeGradientEnd != null
 
-    private val thumbPositionCache = PointF()
+    private val _thumbPositionCache = PointF()
+
+    private var _gradientPositionsCache = FloatArray(2)
+    private var _gradientColorsCache = IntArray(2)
+    private val _gradientMatrixCache = Matrix()
 
     init {
         initColors()
@@ -285,18 +289,14 @@ class TimeRangePicker @JvmOverloads constructor(
         postInvalidate()
     }
 
-    private var gradientPositionsCache = FloatArray(2)
-    private var gradientColorsCache = IntArray(2)
-    private val gradientMatrixCache = Matrix()
-
     private fun updateGradient() {
         fun resizeCacheIfNeeded(desiredSize: Int) {
-            if(gradientPositionsCache.size != desiredSize) {
-                gradientPositionsCache = FloatArray(desiredSize)
+            if(_gradientPositionsCache.size != desiredSize) {
+                _gradientPositionsCache = FloatArray(desiredSize)
             }
 
-            if(gradientColorsCache.size != desiredSize) {
-                gradientColorsCache = IntArray(desiredSize)
+            if(_gradientColorsCache.size != desiredSize) {
+                _gradientColorsCache = IntArray(desiredSize)
             }
         }
 
@@ -316,29 +316,29 @@ class TimeRangePicker @JvmOverloads constructor(
         if(gradientMiddle == null) {
             resizeCacheIfNeeded(2)
 
-            positions = gradientPositionsCache
+            positions = _gradientPositionsCache
             // first element is always 0
             positions[1] = sweepAngle / 360f
 
-            colors = gradientColorsCache
+            colors = _gradientColorsCache
             colors[0] = gradientStart
             colors[1] = gradientEnd
         } else {
             resizeCacheIfNeeded(3)
 
-            positions = gradientPositionsCache
+            positions = _gradientPositionsCache
             // first element is always 0
             positions[1] = (sweepAngle / 360f) / 2
             positions[2] = sweepAngle / 360f
 
-            colors = gradientColorsCache
+            colors = _gradientColorsCache
             colors[0] = gradientStart
             colors[1] = gradientMiddle
             colors[2] = gradientEnd
         }
 
         val gradient: Shader = SweepGradient(_middlePoint.x, _middlePoint.y, colors, positions)
-        val gradientMatrix = gradientMatrixCache
+        val gradientMatrix = _gradientMatrixCache
 
         gradientMatrix.reset()
         gradientMatrix.preRotate(-_angleStart, _middlePoint.x, _middlePoint.y)
@@ -419,18 +419,18 @@ class TimeRangePicker @JvmOverloads constructor(
 
         getThumbPosition(
             angleTo360(_angleStart),
-            thumbPositionCache
+            _thumbPositionCache
         )
-        val startThumbX = thumbPositionCache.x
-        val startThumbY = thumbPositionCache.y
+        val startThumbX = _thumbPositionCache.x
+        val startThumbY = _thumbPositionCache.y
 
         getThumbPosition(
             _angleEnd,
-            thumbPositionCache
+            _thumbPositionCache
         )
 
-        val endThumbX = thumbPositionCache.x
-        val endThumbY = thumbPositionCache.y
+        val endThumbX = _thumbPositionCache.x
+        val endThumbY = _thumbPositionCache.y
 
         // Draw start thumb
         canvas.drawArc(
@@ -646,14 +646,14 @@ class TimeRangePicker @JvmOverloads constructor(
     }
 
     private fun getClosestThumb(touchX: Float, touchY: Float): Thumb {
-        getThumbPosition(angleTo360(_angleStart), thumbPositionCache)
-        val startThumbX = thumbPositionCache.x
-        val startThumbY = thumbPositionCache.y
+        getThumbPosition(angleTo360(_angleStart), _thumbPositionCache)
+        val startThumbX = _thumbPositionCache.x
+        val startThumbY = _thumbPositionCache.y
 
-        getThumbPosition(_angleEnd, thumbPositionCache)
+        getThumbPosition(_angleEnd, _thumbPositionCache)
 
-        val endThumbX = thumbPositionCache.x
-        val endThumbY = thumbPositionCache.y
+        val endThumbX = _thumbPositionCache.x
+        val endThumbY = _thumbPositionCache.y
 
         val distanceFromMiddle =
             MathUtils.distanceBetweenPoints(_middlePoint.x, _middlePoint.y, touchX, touchY)
