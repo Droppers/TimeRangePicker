@@ -59,15 +59,16 @@ internal class ClockRenderer(private val timeRangePicker: TimeRangePicker) {
 
         for (i in 0 until tickCount) {
             val angle = anglePerTick * i
+            val angleRadians = Math.toRadians(angle.toDouble())
 
-            getPositionByAngle(radius, angle, drawTicksPosition)
-            val startX = drawTicksPosition.x
-            val startY = drawTicksPosition.y
+            val sinAngle = sin(angleRadians).toFloat()
+            val cosAngle = cos(angleRadians).toFloat()
 
-            getPositionByAngle(radius - tickLength, angle, drawTicksPosition)
+            val startX = _middle.x + radius * cosAngle
+            val startY = _middle.y + radius * sinAngle
 
-            val stopX = drawTicksPosition.x
-            val stopY = drawTicksPosition.y
+            val stopX = _middle.x + (radius - tickLength) * cosAngle
+            val stopY = _middle.y + (radius - tickLength) * sinAngle
 
             if (timeRangePicker.clockFace == TimeRangePicker.ClockFace.SAMSUNG &&
                 ((angle >= 90-offset && angle <= 90+offset) ||

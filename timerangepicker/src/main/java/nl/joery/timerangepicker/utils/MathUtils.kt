@@ -4,16 +4,22 @@ import nl.joery.timerangepicker.TimeRangePicker
 import kotlin.math.*
 
 internal object MathUtils {
+    private const val R2D = 180f / PI.toFloat()
+
     fun differenceBetweenAngles(a1: Float, a2: Float): Float {
         val angle1 = Math.toRadians(a1.toDouble())
         val angle2 = Math.toRadians(a2.toDouble())
 
-        return Math.toDegrees(
-            atan2(
-                cos(angle1) * sin(angle2) - sin(angle1) * cos(angle2),
-                cos(angle1) * cos(angle2) + sin(angle1) * sin(angle2)
-            )
-        ).toFloat()
+        val sinAngle1 = sin(angle1).toFloat()
+        val cosAngle1 = cos(angle1).toFloat()
+
+        val sinAngle2 = sin(angle2).toFloat()
+        val cosAngle2 = cos(angle2).toFloat()
+
+        return atan2(
+                cosAngle1 * sinAngle2 - sinAngle1 * cosAngle2,
+                cosAngle1 * cosAngle2 + sinAngle1 * sinAngle2
+        ) * R2D
     }
 
     fun angleTo360(angle: Float): Float {
