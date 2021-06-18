@@ -47,8 +47,6 @@ internal class ClockRenderer(private val timeRangePicker: TimeRangePicker) {
         drawLabels(canvas, radius)
     }
 
-    private val drawTicksPosition = PointF()
-
     private fun drawTicks(canvas: Canvas, radius: Float) {
         val hourTickInterval = if(timeRangePicker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) 24 else 12
         val tickLength = _tickLength
@@ -60,6 +58,7 @@ internal class ClockRenderer(private val timeRangePicker: TimeRangePicker) {
         for (i in 0 until tickCount) {
             val angle = anglePerTick * i
             val angleRadians = Math.toRadians(angle.toDouble())
+            val stopRadius = radius - tickLength
 
             val sinAngle = sin(angleRadians).toFloat()
             val cosAngle = cos(angleRadians).toFloat()
@@ -67,8 +66,8 @@ internal class ClockRenderer(private val timeRangePicker: TimeRangePicker) {
             val startX = _middle.x + radius * cosAngle
             val startY = _middle.y + radius * sinAngle
 
-            val stopX = _middle.x + (radius - tickLength) * cosAngle
-            val stopY = _middle.y + (radius - tickLength) * sinAngle
+            val stopX = _middle.x + stopRadius * cosAngle
+            val stopY = _middle.y + stopRadius * sinAngle
 
             if (timeRangePicker.clockFace == TimeRangePicker.ClockFace.SAMSUNG &&
                 ((angle >= 90-offset && angle <= 90+offset) ||
