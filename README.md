@@ -1,33 +1,29 @@
-# TimeRangePicker
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/nl.joery.timerangepicker/timerangepicker/badge.svg)](https://maven-badges.herokuapp.com/maven-central/nl.joery.timerangepicker/timerangepicker)
-[![API](https://img.shields.io/badge/API-14%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=14) 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<h1 align="center">⏰ TimeRangePicker</h1></br>
+<p align="center">
+  <img src="./art/example-animated.gif" width="250px">
+  <br><br>
+  A customizable, easy-to-use, and functional circular time range picker library for Android. Use this library to mimic Apple's iOS or Samsung's bedtime picker.
+</p>
 
-A customizable, easy-to-use, and functional circular time range picker library for Android. Use this library to mimic Apple's iOS or Samsung's bedtime picker.
+<h6 align="center">
+  <img src="https://maven-badges.herokuapp.com/maven-central/nl.joery.timerangepicker/timerangepicker/badge.svg" height="22" valign="middle">&nbsp;&nbsp;
+  <img src="https://img.shields.io/badge/API-14%2B-brightgreen.svg?style=flat" height="22" valign="middle">&nbsp;&nbsp;
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" height="22" valign="middle">&nbsp;&nbsp;
+  <img src= "https://joery.nl/static/vector/logo.svg" height="22" valign="middle">&nbsp;&nbsp;By <a href="https://joery.nl">Joery Droppers</a>
+</h6>
 
-## Examples
-<table>
-    <tr>
-        <td><img src="./art/example-animated.gif" width="300" /></td>
-        <td><img src="./art/example-2.png" width="250" /><br><img src="./art/example-3.png" width="250" /></td>
-    </tr>
-</table>
+## Screenshots
+<img src="./art/example-2.png" width="200" /> <img src="./art/example-3.png" width="200" />
 
 ## Playground app
-<img src="./art/playground-demo.png" width="400" />
-
+<a href="https://play.google.com/store/apps/details?id=nl.joery.demo.timerangepicker">
+<img src="./art/playground-demo.png" width="350" valign="middle">
+&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" width="200" valign="middle"></a> 
+<br><br>
 Download the playground app from Google Play, with this app you can try out all features and even generate XML with your selected configuration.
 
-<a href="https://play.google.com/store/apps/details?id=nl.joery.demo.timerangepicker"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" width="200" /></a>
-
-## Contents
-- [Getting started](#getting-started)
-- [Managing picker programmatically](#managing-picker-programmatically)
-- [Configuration](#configuration)
-
 ## Getting started
-<img src="./art/getting-started.png?3" width="250" />
-
 This library is available on Maven Central, add the following dependency to your <b>build.gradle</b>:
 ```gradle
 implementation 'nl.joery.timerangepicker:timerangepicker:1.0.0'
