@@ -103,6 +103,12 @@ class TimeRangePicker @JvmOverloads constructor(
     private val _isGradientSlider: Boolean
         get() = _sliderRangeGradientStart != null && _sliderRangeGradientEnd != null
 
+    private val _thumbPositionCache = PointF()
+
+    private var _gradientPositionsCache = FloatArray(2)
+    private var _gradientColorsCache = IntArray(2)
+    private val _gradientMatrixCache = Matrix()
+
     init {
         initColors()
         initAttributes(attrs)
@@ -114,15 +120,21 @@ class TimeRangePicker @JvmOverloads constructor(
 
     private fun initColors() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            _sliderRangeColor = context.getColorResCompat(android.R.attr.colorPrimary)
-            _thumbColor = context.getColorResCompat(android.R.attr.colorPrimary)
+            val colorPrimary = context.getColorResCompat(android.R.attr.colorPrimary)
+
+            _sliderRangeColor = colorPrimary
+            _thumbColor = colorPrimary
         } else {
             _sliderRangeColor = Color.BLUE
             _thumbColor = Color.BLUE
         }
-        _sliderColor = Color.parseColor("#E1E1E1")
-        _clockTickColor = context.getTextColor(android.R.attr.textColorPrimary)
-        _clockLabelColor = context.getTextColor(android.R.attr.textColorPrimary)
+
+        _sliderColor = 0xFFE1E1E1.toInt()
+
+        val textColorPrimary = context.getTextColor(android.R.attr.textColorPrimary)
+
+        _clockTickColor = textColorPrimary
+        _clockLabelColor = textColorPrimary
     }
 
     private fun initAttributes(
@@ -141,24 +153,24 @@ class TimeRangePicker @JvmOverloads constructor(
             _angleStart = minutesToAngle(
                 attr.getInt(
                     R.styleable.TimeRangePicker_trp_endTimeMinutes,
-                    angleToMinutes(minutesToAngle(Time(0, 0).totalMinutes, _hourFormat), _hourFormat)
+                    angleToMinutes(minutesToAngle(0, _hourFormat), _hourFormat)
                 ),
                 _hourFormat
             )
             _angleEnd = minutesToAngle(
                 attr.getInt(
                     R.styleable.TimeRangePicker_trp_startTimeMinutes,
-                    angleToMinutes(minutesToAngle(Time(8, 0).totalMinutes, _hourFormat), _hourFormat)
+                    angleToMinutes(minutesToAngle(480 /* 8:00 */, _hourFormat), _hourFormat)
                 ),
                 _hourFormat
             )
             val startTime = attr.getString(R.styleable.TimeRangePicker_trp_startTime)
             if (startTime != null) {
-                _angleStart = minutesToAngle(Time.parse(startTime).totalMinutes, _hourFormat)
+                _angleStart = minutesToAngle(Time.parseToTotalMinutes(startTime), _hourFormat)
             }
             val endTime = attr.getString(R.styleable.TimeRangePicker_trp_endTime)
             if (endTime != null) {
-                _angleEnd = minutesToAngle(Time.parse(endTime).totalMinutes, _hourFormat)
+                _angleEnd = minutesToAngle(Time.parseToTotalMinutes(endTime), _hourFormat)
             }
 
             // Duration
@@ -167,11 +179,11 @@ class TimeRangePicker @JvmOverloads constructor(
 
             val minDuration = attr.getString(R.styleable.TimeRangePicker_trp_minDuration)
             if (minDuration != null) {
-                minDurationMinutes = Time.parse(minDuration).totalMinutes
+                minDurationMinutes = Time.parseToTotalMinutes(minDuration)
             }
             val maxDuration = attr.getString(R.styleable.TimeRangePicker_trp_maxDuration)
             if (maxDuration != null) {
-                maxDurationMinutes = Time.parse(maxDuration).totalMinutes
+                maxDurationMinutes = Time.parseToTotalMinutes(maxDuration)
             }
 
             _stepTimeMinutes = attr.getInt(
@@ -278,27 +290,57 @@ class TimeRangePicker @JvmOverloads constructor(
     }
 
     private fun updateGradient() {
+        fun resizeCacheIfNeeded(desiredSize: Int) {
+            if(_gradientPositionsCache.size != desiredSize) {
+                _gradientPositionsCache = FloatArray(desiredSize)
+            }
+
+            if(_gradientColorsCache.size != desiredSize) {
+                _gradientColorsCache = IntArray(desiredSize)
+            }
+        }
+
         if (!_isGradientSlider) {
             return
         }
 
-        val sweepAngle =
-            angleTo360(_angleStart - _angleEnd)
+        val sweepAngle = angleTo360(_angleStart - _angleEnd)
 
-        val positions = if (_sliderRangeGradientMiddle == null) {
-            floatArrayOf(0f, sweepAngle / 360f)
+        val positions: FloatArray
+        val colors: IntArray
+
+        val gradientStart = _sliderRangeGradientStart!!
+        val gradientEnd = _sliderRangeGradientEnd!!
+        val gradientMiddle = _sliderRangeGradientMiddle
+
+        if(gradientMiddle == null) {
+            resizeCacheIfNeeded(2)
+
+            positions = _gradientPositionsCache
+            // first element is always 0
+            positions[1] = sweepAngle / 360f
+
+            colors = _gradientColorsCache
+            colors[0] = gradientStart
+            colors[1] = gradientEnd
         } else {
-            floatArrayOf(0f, (sweepAngle / 360f) / 2, sweepAngle / 360f)
-        }
-        val colors = if (_sliderRangeGradientMiddle == null) {
-            intArrayOf(_sliderRangeGradientStart!!, _sliderRangeGradientEnd!!)
-        } else {
-            intArrayOf(_sliderRangeGradientStart!!, _sliderRangeGradientMiddle!!, _sliderRangeGradientEnd!!)
+            resizeCacheIfNeeded(3)
+
+            positions = _gradientPositionsCache
+            // first element is always 0
+            positions[1] = (sweepAngle / 360f) / 2
+            positions[2] = sweepAngle / 360f
+
+            colors = _gradientColorsCache
+            colors[0] = gradientStart
+            colors[1] = gradientMiddle
+            colors[2] = gradientEnd
         }
 
-        val gradient: Shader =
-            SweepGradient(_middlePoint.x, _middlePoint.y, colors, positions)
-        val gradientMatrix = Matrix()
+        val gradient: Shader = SweepGradient(_middlePoint.x, _middlePoint.y, colors, positions)
+        val gradientMatrix = _gradientMatrixCache
+
+        gradientMatrix.reset()
         gradientMatrix.preRotate(-_angleStart, _middlePoint.x, _middlePoint.y)
         gradient.setLocalMatrix(gradientMatrix)
         _sliderRangePaint.shader = gradient
@@ -375,10 +417,20 @@ class TimeRangePicker @JvmOverloads constructor(
             _sliderPaint
         )
 
-        val startThumb = getThumbPosition(
-            angleTo360(_angleStart)
+        getThumbPosition(
+            angleTo360(_angleStart),
+            _thumbPositionCache
         )
-        val endThumb = getThumbPosition(_angleEnd)
+        val startThumbX = _thumbPositionCache.x
+        val startThumbY = _thumbPositionCache.y
+
+        getThumbPosition(
+            _angleEnd,
+            _thumbPositionCache
+        )
+
+        val endThumbX = _thumbPositionCache.x
+        val endThumbY = _thumbPositionCache.y
 
         // Draw start thumb
         canvas.drawArc(
@@ -390,11 +442,17 @@ class TimeRangePicker @JvmOverloads constructor(
         )
         drawRangeCap(
             canvas,
-            startThumb,
+            startThumbX, startThumbY,
             0f,
             if (_isGradientSlider) _sliderRangeGradientStart!! else _sliderRangeColor
         )
-        drawThumb(canvas, _thumbStartPaint, _thumbIconStart, _activeThumb == Thumb.START, startThumb.x, startThumb.y)
+        drawThumb(
+            canvas,
+            _thumbStartPaint,
+            _thumbIconStart,
+            _activeThumb == Thumb.START,
+            startThumbX, startThumbY
+        )
 
         // Draw end thumb
         canvas.drawArc(
@@ -406,31 +464,38 @@ class TimeRangePicker @JvmOverloads constructor(
         )
         drawRangeCap(
             canvas,
-            endThumb,
+            endThumbX, endThumbY,
             180f,
             if (_isGradientSlider) _sliderRangeGradientEnd!! else _sliderRangeColor
         )
-        drawThumb(canvas, _thumbEndPaint, _thumbIconEnd, _activeThumb == Thumb.END, endThumb.x, endThumb.y)
+        drawThumb(
+            canvas,
+            _thumbEndPaint,
+            _thumbIconEnd,
+            _activeThumb == Thumb.END,
+            endThumbX, endThumbY
+        )
     }
 
     private fun drawRangeCap(
         canvas: Canvas,
-        position: PointF,
+        posX: Float,
+        posY: Float,
         rotation: Float, @ColorInt color: Int
     ) {
         val capAngle = Math.toDegrees(
             atan2(
-                _middlePoint.x - position.x,
-                position.y - _middlePoint.y
+                _middlePoint.x - posX,
+                posY - _middlePoint.y
             ).toDouble()
         ).toFloat()
         _gradientPaint.color = color
 
         _sliderCapRect.set(
-            position.x - _sliderWidth / 2f,
-            position.y - _sliderWidth / 2f,
-            position.x + _sliderWidth / 2f,
-            position.y + _sliderWidth / 2f
+            posX - _sliderWidth / 2f,
+            posY - _sliderWidth / 2f,
+            posX + _sliderWidth / 2f,
+            posY + _sliderWidth / 2f
         )
         canvas.drawArc(
             _sliderCapRect,
@@ -581,17 +646,22 @@ class TimeRangePicker @JvmOverloads constructor(
     }
 
     private fun getClosestThumb(touchX: Float, touchY: Float): Thumb {
-        val startThumb = getThumbPosition(
-            angleTo360(_angleStart)
-        )
-        val endThumb = getThumbPosition(_angleEnd)
+        getThumbPosition(angleTo360(_angleStart), _thumbPositionCache)
+        val startThumbX = _thumbPositionCache.x
+        val startThumbY = _thumbPositionCache.y
+
+        getThumbPosition(_angleEnd, _thumbPositionCache)
+
+        val endThumbX = _thumbPositionCache.x
+        val endThumbY = _thumbPositionCache.y
+
         val distanceFromMiddle =
             MathUtils.distanceBetweenPoints(_middlePoint.x, _middlePoint.y, touchX, touchY)
         if (MathUtils.isPointInCircle(
                 touchX,
                 touchY,
-                endThumb.x,
-                endThumb.y,
+                endThumbX,
+                endThumbY,
                 _thumbSize * 2f
             )
         ) {
@@ -599,8 +669,8 @@ class TimeRangePicker @JvmOverloads constructor(
         } else if (MathUtils.isPointInCircle(
                 touchX,
                 touchY,
-                startThumb.x,
-                startThumb.y,
+                startThumbX,
+                startThumbY,
                 _thumbSize * 2f
             )
         ) {
@@ -613,12 +683,13 @@ class TimeRangePicker @JvmOverloads constructor(
     }
 
     private fun getThumbPosition(
-        angle: Float
-    ): PointF {
-        return PointF(
-            (_middlePoint.x + _radius * cos(Math.toRadians(-angle.toDouble()))).toFloat(),
-            (_middlePoint.y + _radius * sin(Math.toRadians(-angle.toDouble()))).toFloat()
-        )
+        angle: Float,
+        outPoint: PointF
+    ) {
+        val radians = Math.toRadians(-angle.toDouble())
+
+        outPoint.x = _middlePoint.x + _radius * cos(radians).toFloat()
+        outPoint.y = _middlePoint.y + _radius * sin(radians).toFloat()
     }
 
     fun setOnTimeChangeListener(onTimeChangeListener: OnTimeChangeListener) {
@@ -1010,11 +1081,15 @@ class TimeRangePicker @JvmOverloads constructor(
 
         companion object {
             fun parse(time: String): Time {
+                return Time(parseToTotalMinutes(time))
+            }
+
+            internal fun parseToTotalMinutes(str: String): Int {
                 fun throwInvalidFormat(): Nothing {
-                    throw IllegalArgumentException("Format of time value '$time' is invalid, expected format hh:mm.")
+                    throw IllegalArgumentException("Format of time value '$str' is invalid, expected format hh:mm.")
                 }
 
-                val colonIdx = time.indexOf(':')
+                val colonIdx = str.indexOf(':')
 
                 if(colonIdx < 0) {
                     throwInvalidFormat()
@@ -1024,8 +1099,8 @@ class TimeRangePicker @JvmOverloads constructor(
                 val minute: Int
 
                 try {
-                    hour = time.parsePositiveInt(0, colonIdx)
-                    minute = time.parsePositiveInt(colonIdx + 1, time.length)
+                    hour = str.parsePositiveInt(0, colonIdx)
+                    minute = str.parsePositiveInt(colonIdx + 1, str.length)
                 } catch (e: Exception) {
                     throwInvalidFormat()
                 }
@@ -1034,7 +1109,7 @@ class TimeRangePicker @JvmOverloads constructor(
                     throwInvalidFormat()
                 }
 
-                return Time(hour, minute)
+                return hour * 60 + minute
             }
         }
     }
