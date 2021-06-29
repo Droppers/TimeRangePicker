@@ -13,6 +13,50 @@ object DefaultClockRenderer: ClockRenderer {
     private val LABELS_SAMSUNG_24 = arrayOf("0", "6", "12", "18")
     private val LABELS_SAMSUNG_12 = arrayOf("12", "3", "6", "9")
 
+    private val SIN_TABLE_LABELS_APPLE = floatArrayOf(
+        -1f,
+        -0.866025f,
+        -0.5f,
+        0f,
+        0.5f,
+        0.866025f,
+        1f,
+        0.866025f,
+        0.5f,
+        0f,
+        -0.5f,
+        -0.866025f
+    )
+
+    private val COS_TABLE_LABELS_APPLE = floatArrayOf(
+        0f,
+        0.5f,
+        0.866025f,
+        1f,
+        0.866025f,
+        0.5f,
+        0f,
+        -0.5f,
+        -0.866025f,
+        -1f,
+        -0.866025f,
+        -0.5f
+    )
+
+    private val SIN_TABLE_LABELS_SAMSUNG = floatArrayOf(
+        -1f,
+        0f,
+        1f,
+        0f
+    )
+
+    private val COS_TABLE_LABELS_SAMSUNG = floatArrayOf(
+        0f,
+        1f,
+        0f,
+        -1f
+    )
+
     private val _minuteTickWidth = 1.px
     private val _hourTickWidth = 2.px
     private val _middle = PointF(0f, 0f)
@@ -95,53 +139,61 @@ object DefaultClockRenderer: ClockRenderer {
     }
 
     private val _drawLabelsBounds = Rect()
-    private val _drawLabelsPosition = PointF()
 
     private fun drawLabels(canvas: Canvas, picker: TimeRangePicker, radius: Float) {
-        val labels = when (picker.clockFace) {
+        val labels: Array<String>
+        val sinTable: FloatArray
+        val cosTable: FloatArray
+
+        when(picker.clockFace) {
             TimeRangePicker.ClockFace.APPLE -> {
-                if (picker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) {
+                labels =  if (picker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) {
                     LABELS_APPLE_24
                 } else {
                     LABELS_APPLE_12
                 }
+                sinTable = SIN_TABLE_LABELS_APPLE
+                cosTable = COS_TABLE_LABELS_APPLE
             }
             TimeRangePicker.ClockFace.SAMSUNG -> {
-                if (picker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) {
+                labels =  if (picker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) {
                     LABELS_SAMSUNG_24
                 } else {
                     LABELS_SAMSUNG_12
                 }
+
+                sinTable = SIN_TABLE_LABELS_SAMSUNG
+                cosTable = COS_TABLE_LABELS_SAMSUNG
             }
         }
 
         val bounds = _drawLabelsBounds
-        val position = _drawLabelsPosition
         val tickLength = picker._tickLength.toFloat()
+        val anglePerLabel = 360f / labels.size
 
         for (i in labels.indices) {
             val label = labels[i]
-            val angle = 360f / labels.size * i - 90f
 
             _labelPaint.getTextBounds(label, 0, label.length, bounds)
             val offset = when (picker.clockFace) {
                 TimeRangePicker.ClockFace.APPLE -> tickLength * 2 + bounds.height()
-                TimeRangePicker.ClockFace.SAMSUNG -> (if(angle == 0f || angle == 180f) bounds.width() else bounds.height()).toFloat() / 2
+                TimeRangePicker.ClockFace.SAMSUNG -> {
+                    val angle = anglePerLabel * i - 90f
+                    (if (angle == 0f || angle == 180f) bounds.width() else bounds.height()).toFloat() / 2
+                }
             }
 
-            getPositionByAngle(radius - offset, angle, position)
+            val radiusNoOffset = radius - offset
+
+            val posX = _middle.x + radiusNoOffset * cosTable[i]
+            val posY = _middle.y + radiusNoOffset * sinTable[i]
+
             canvas.drawText(
                 label,
-                position.x,
-                position.y + bounds.height() / 2f,
+                posX,
+                posY + bounds.height() / 2f,
                 _labelPaint
             )
         }
-    }
-
-    private fun getPositionByAngle(radius: Float, angle: Float, outPoint: PointF) {
-        val angleRadians = Math.toRadians(angle.toDouble())
-        outPoint.x = _middle.x + radius * cos(angleRadians).toFloat()
-        outPoint.y = _middle.y + radius * sin(angleRadians).toFloat()
     }
 }
