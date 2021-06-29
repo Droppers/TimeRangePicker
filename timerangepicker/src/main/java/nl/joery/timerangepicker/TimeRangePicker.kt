@@ -39,8 +39,7 @@ import kotlin.properties.Delegates
 class TimeRangePicker @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-    private val _clockRenderer = ClockRenderer(this)
-
+    private var _clockRenderer: ClockRenderer = DefaultClockRenderer
     private val _thumbStartPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val _thumbEndPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
@@ -114,7 +113,6 @@ class TimeRangePicker @JvmOverloads constructor(
         initAttributes(attrs)
 
         updateMiddlePoint()
-        _clockRenderer.updatePaint()
         updatePaint()
     }
 
@@ -397,7 +395,8 @@ class TimeRangePicker @JvmOverloads constructor(
         super.onDraw(canvas)
 
         if (_clockVisible) {
-            _clockRenderer.render(canvas, _radius - max(_thumbSize, _sliderWidth) / 2f - 8.px)
+            val radius = _radius - max(_thumbSize, _sliderWidth) / 2f - 8.px
+            _clockRenderer.render(canvas, this, radius)
         }
 
         _sliderRect.set(
@@ -699,6 +698,13 @@ class TimeRangePicker @JvmOverloads constructor(
     fun setOnDragChangeListener(onDragChangeListener: OnDragChangeListener) {
         this.onDragChangeListener = onDragChangeListener
     }
+
+    var clockRenderer: ClockRenderer
+        get() = _clockRenderer
+        set(value) {
+            _clockRenderer = value
+            invalidate()
+        }
 
     // Time
     var hourFormat
@@ -1021,7 +1027,6 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockTickColor
         set(@ColorInt value) {
             _clockTickColor = value
-            _clockRenderer.updatePaint()
             postInvalidate()
         }
 
@@ -1037,7 +1042,6 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockLabelColor
         set(@ColorInt value) {
             _clockLabelColor = value
-            _clockRenderer.updatePaint()
             postInvalidate()
         }
 
@@ -1053,7 +1057,6 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockLabelSize
         set(@Dimension value) {
             _clockLabelSize = value
-            _clockRenderer.updatePaint()
             postInvalidate()
         }
 
