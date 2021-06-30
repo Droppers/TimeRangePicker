@@ -35,9 +35,10 @@ internal fun createClockRenderer(name: String): ClockRenderer {
     }
 
     val mods = instanceField.modifiers
+    // check whether field modifiers contains only expected bits and any others
     if ((mods and KSINGLETION_EXPECTED_MODS) != KSINGLETION_EXPECTED_MODS) {
         // we checked whether class contains constructors with no parameters
-        // so programmer may expect that library picks value from INSTANCE field,
+        // If there are no such constructors, programmer may expect that library picks value from INSTANCE field,
         // which is typical for singletons.
         // The field has invalid modifiers and we should inform that something is wrong
         // with the field.
