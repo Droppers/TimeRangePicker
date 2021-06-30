@@ -1,11 +1,13 @@
 package nl.joery.timerangepicker
 
 import android.graphics.*
+import androidx.annotation.Keep
 import nl.joery.timerangepicker.utils.dp
 import nl.joery.timerangepicker.utils.px
 import kotlin.math.cos
 import kotlin.math.sin
 
+@Keep
 object DefaultClockRenderer: ClockRenderer {
     private val LABELS_APPLE_24 = arrayOf("0", "2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22")
     private val LABELS_APPLE_12 =  arrayOf("12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")
