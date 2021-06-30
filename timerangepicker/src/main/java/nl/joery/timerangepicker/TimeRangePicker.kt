@@ -15,26 +15,21 @@ import androidx.annotation.*
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import nl.joery.timerangepicker.utils.*
-import nl.joery.timerangepicker.utils.MathUtils
-import nl.joery.timerangepicker.utils.MathUtils.differenceBetweenAngles
 import nl.joery.timerangepicker.utils.MathUtils.angleTo360
 import nl.joery.timerangepicker.utils.MathUtils.angleTo720
 import nl.joery.timerangepicker.utils.MathUtils.angleToMinutes
 import nl.joery.timerangepicker.utils.MathUtils.angleToPreciseMinutes
+import nl.joery.timerangepicker.utils.MathUtils.differenceBetweenAngles
 import nl.joery.timerangepicker.utils.MathUtils.durationBetweenMinutes
 import nl.joery.timerangepicker.utils.MathUtils.minutesToAngle
 import nl.joery.timerangepicker.utils.MathUtils.simpleMinutesToAngle
 import nl.joery.timerangepicker.utils.MathUtils.snapMinutes
-import nl.joery.timerangepicker.utils.getColorResCompat
-import nl.joery.timerangepicker.utils.px
-import nl.joery.timerangepicker.utils.sp
 import java.time.Duration
 import java.time.LocalTime
 import java.util.*
 import javax.xml.datatype.DatatypeFactory
 import kotlin.math.*
 import kotlin.properties.Delegates
-
 
 class TimeRangePicker @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -81,14 +76,14 @@ class TimeRangePicker @JvmOverloads constructor(
 
     private val _radius: Float
         get() = (min(width, height) / 2f - max(
-                    max(
-                        _thumbSize,
-                        (_thumbSize * _thumbSizeActiveGrow).toInt()
-                    ), _sliderWidth
-                ) / 2f) - max(
-                    max(paddingTop, paddingLeft),
-                    max(paddingBottom, paddingRight)
-                )
+            max(
+                _thumbSize,
+                (_thumbSize * _thumbSizeActiveGrow).toInt()
+            ), _sliderWidth
+        ) / 2f) - max(
+            max(paddingTop, paddingLeft),
+            max(paddingBottom, paddingRight)
+        )
 
     private var _middlePoint = PointF(0f, 0f)
 
@@ -172,8 +167,10 @@ class TimeRangePicker @JvmOverloads constructor(
             }
 
             // Duration
-            minDurationMinutes = attr.getInt(R.styleable.TimeRangePicker_trp_minDurationMinutes, _minDurationMinutes)
-            maxDurationMinutes = attr.getInt(R.styleable.TimeRangePicker_trp_maxDurationMinutes, _maxDurationMinutes)
+            minDurationMinutes =
+                attr.getInt(R.styleable.TimeRangePicker_trp_minDurationMinutes, _minDurationMinutes)
+            maxDurationMinutes =
+                attr.getInt(R.styleable.TimeRangePicker_trp_maxDurationMinutes, _maxDurationMinutes)
 
             val minDuration = attr.getString(R.styleable.TimeRangePicker_trp_minDuration)
             if (minDuration != null) {
@@ -216,16 +213,20 @@ class TimeRangePicker @JvmOverloads constructor(
                 R.styleable.TimeRangePicker_trp_thumbSize,
                 _thumbSize.toFloat()
             ).toInt()
-            _thumbSizeActiveGrow = attr.getFloat(R.styleable.TimeRangePicker_trp_thumbSizeActiveGrow, _thumbSizeActiveGrow)
+            _thumbSizeActiveGrow = attr.getFloat(
+                R.styleable.TimeRangePicker_trp_thumbSizeActiveGrow,
+                _thumbSizeActiveGrow
+            )
 
             val thumbColor = attr.getColor(R.styleable.TimeRangePicker_trp_thumbColor, 0)
-            _thumbColor = if(thumbColor == 0) _thumbColor else thumbColor
+            _thumbColor = if (thumbColor == 0) _thumbColor else thumbColor
             _thumbColorAuto = thumbColor == 0
             val iconColor = attr.getColor(R.styleable.TimeRangePicker_trp_thumbIconColor, 0)
-            _thumbIconColor = if(iconColor == 0) null else iconColor
+            _thumbIconColor = if (iconColor == 0) null else iconColor
             val iconSize = attr.getDimension(R.styleable.TimeRangePicker_trp_thumbIconSize, -1f)
-            _thumbIconSize = if(iconSize == -1f) null else iconSize.toInt()
-            _thumbIconStart = attr.getDrawable(R.styleable.TimeRangePicker_trp_thumbIconStart)?.mutate()
+            _thumbIconSize = if (iconSize == -1f) null else iconSize.toInt()
+            _thumbIconStart =
+                attr.getDrawable(R.styleable.TimeRangePicker_trp_thumbIconStart)?.mutate()
             _thumbIconEnd = attr.getDrawable(R.styleable.TimeRangePicker_trp_thumbIconEnd)?.mutate()
 
             // Clock
@@ -248,6 +249,12 @@ class TimeRangePicker @JvmOverloads constructor(
                 R.styleable.TimeRangePicker_trp_clockTickColor,
                 _clockTickColor
             )
+
+            val clockRendererClassName =
+                attr.getString(R.styleable.TimeRangePicker_trp_clockRenderer)
+            if (clockRendererClassName != null) {
+                _clockRenderer = createClockRenderer(clockRendererClassName)
+            }
         } finally {
             attr.recycle()
         }
@@ -260,11 +267,13 @@ class TimeRangePicker @JvmOverloads constructor(
     private fun updatePaint() {
         _thumbStartPaint.apply {
             style = Paint.Style.FILL
-            color = if (_thumbColorAuto && _isGradientSlider) _sliderRangeGradientStart!! else _thumbColor
+            color =
+                if (_thumbColorAuto && _isGradientSlider) _sliderRangeGradientStart!! else _thumbColor
         }
         _thumbEndPaint.apply {
             style = Paint.Style.FILL
-            color = if (_thumbColorAuto && _isGradientSlider) _sliderRangeGradientEnd!! else _thumbColor
+            color =
+                if (_thumbColorAuto && _isGradientSlider) _sliderRangeGradientEnd!! else _thumbColor
         }
 
         _sliderPaint.apply {
@@ -289,11 +298,11 @@ class TimeRangePicker @JvmOverloads constructor(
 
     private fun updateGradient() {
         fun resizeCacheIfNeeded(desiredSize: Int) {
-            if(_gradientPositionsCache.size != desiredSize) {
+            if (_gradientPositionsCache.size != desiredSize) {
                 _gradientPositionsCache = FloatArray(desiredSize)
             }
 
-            if(_gradientColorsCache.size != desiredSize) {
+            if (_gradientColorsCache.size != desiredSize) {
                 _gradientColorsCache = IntArray(desiredSize)
             }
         }
@@ -311,7 +320,7 @@ class TimeRangePicker @JvmOverloads constructor(
         val gradientEnd = _sliderRangeGradientEnd!!
         val gradientMiddle = _sliderRangeGradientMiddle
 
-        if(gradientMiddle == null) {
+        if (gradientMiddle == null) {
             resizeCacheIfNeeded(2)
 
             positions = _gradientPositionsCache
@@ -346,10 +355,10 @@ class TimeRangePicker @JvmOverloads constructor(
 
     private fun updateThumbIconColors() {
         if (_thumbIconColor != null) {
-            if(_thumbIconStart != null) {
+            if (_thumbIconStart != null) {
                 DrawableCompat.setTint(_thumbIconStart!!, _thumbIconColor!!)
             }
-            if(_thumbIconEnd != null) {
+            if (_thumbIconEnd != null) {
                 DrawableCompat.setTint(_thumbIconEnd!!, _thumbIconColor!!)
             }
         }
@@ -505,8 +514,15 @@ class TimeRangePicker @JvmOverloads constructor(
         )
     }
 
-    private fun drawThumb(canvas: Canvas, paint: Paint, icon: Drawable?, active: Boolean, x: Float, y: Float) {
-        val grow = if(active) _thumbSizeActiveGrow else 1f
+    private fun drawThumb(
+        canvas: Canvas,
+        paint: Paint,
+        icon: Drawable?,
+        active: Boolean,
+        x: Float,
+        y: Float
+    ) {
+        val grow = if (active) _thumbSizeActiveGrow else 1f
         val thumbRadius = (_thumbSize.toFloat() * grow) / 2f
         canvas.drawCircle(
             x,
@@ -1094,7 +1110,7 @@ class TimeRangePicker @JvmOverloads constructor(
 
                 val colonIdx = str.indexOf(':')
 
-                if(colonIdx < 0) {
+                if (colonIdx < 0) {
                     throwInvalidFormat()
                 }
 
@@ -1108,7 +1124,7 @@ class TimeRangePicker @JvmOverloads constructor(
                     throwInvalidFormat()
                 }
 
-                if(hour >= 24 || minute >= 60) {
+                if (hour >= 24 || minute >= 60) {
                     throwInvalidFormat()
                 }
 
