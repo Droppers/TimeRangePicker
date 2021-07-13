@@ -276,6 +276,28 @@ The attributes listed below can be used to configure the look and feel of the pi
         <td>Set the color of the small time indicator lines in the clock.</td>
         <td>?android:textColorPrimary</td>
     </tr>
+    <tr>
+        <td><b>trp_clockRenderer</b></td>
+        <td>
+            Set the clock renderer through passing the full class name (with packages).             
+            <br/> 
+            Note that, you should add <b>@Keep</b> annotation to your custom renderer class.
+            <br/>
+            There are some requirements which should be met.
+            <br/>
+            The renderer class should have a public constructor with no parameters.
+            <br/>
+            Then renderer will be created through calling that constructor.
+            <br/>
+            Or the class should have non-null <b>public static final INSTANCE</b> field. 
+            <br/>
+            The value of the field should extend <b>ClockRenderer</b> 
+            <br/>
+            If the class contains both public constructor and <b>INSTANCE</b> field,
+            the way through calling constructor is preferred
+        </td>
+        <td>nl.joery.timerangepicker.DefaultClockRenderer</td>
+    </tr>
 </table>
 
 ## Credits

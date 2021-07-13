@@ -43,5 +43,6 @@
         <attr name="trp_clockLabelSize" format="dimension" />
         <attr name="trp_clockLabelColor" format="color" />
         <attr name="trp_clockTickColor" format="color" />
+        <attr name="trp_clockRenderer" format="string"/>
     </declare-styleable>
 </resources>
