@@ -16,47 +16,47 @@ object DefaultClockRenderer: ClockRenderer {
     private val LABELS_SAMSUNG_12 = arrayOf("12", "3", "6", "9")
 
     private val SIN_TABLE_LABELS_APPLE = floatArrayOf(
-        -1f,
-        -0.866025f,
-        -0.5f,
-        0f,
-        0.5f,
-        0.866025f,
-        1f,
-        0.866025f,
-        0.5f,
-        0f,
-        -0.5f,
-        -0.866025f
+        -1f, // sin(-90)
+        -0.866025f, // sin(-60)
+        -0.5f, // sin(-30)
+        0f, // sin(0)
+        0.5f, // sin(30)
+        0.866025f, // sin(60)
+        1f, // sin(90)
+        0.866025f, // sin(120)
+        0.5f, // sin(150)
+        0f, // sin(180)
+        -0.5f, // sin(210)
+        -0.866025f, // sin(240)
     )
 
     private val COS_TABLE_LABELS_APPLE = floatArrayOf(
-        0f,
-        0.5f,
-        0.866025f,
-        1f,
-        0.866025f,
-        0.5f,
-        0f,
-        -0.5f,
-        -0.866025f,
-        -1f,
-        -0.866025f,
-        -0.5f
+        0f, // cos(-90)
+        0.5f, // cos(-60)
+        0.866025f, // cos(-30)
+        1f, // cos(0)
+        0.866025f, // cos(30)
+        0.5f, // cos(60)
+        0f, // cos(90)
+        -0.5f, // cos(120)
+        -0.866025f, // cos(150)
+        -1f, // cos(180)
+        -0.866025f, // cos(210)
+        -0.5f, // cos(240)
     )
 
     private val SIN_TABLE_LABELS_SAMSUNG = floatArrayOf(
-        -1f,
-        0f,
-        1f,
-        0f
+        -1f, // sin(-90)
+        0f, // sin(0)
+        1f, // sin(90)
+        0f, // sin(180)
     )
 
     private val COS_TABLE_LABELS_SAMSUNG = floatArrayOf(
-        0f,
-        1f,
-        0f,
-        -1f
+        0f, // cos(-90)
+        1f, // cos(0)
+        0f, // cos(90)
+        -1f, // cos(180)
     )
 
     private val _minuteTickWidth = 1.px
@@ -98,11 +98,12 @@ object DefaultClockRenderer: ClockRenderer {
     }
 
     private fun drawTicks(canvas: Canvas, picker: TimeRangePicker, radius: Float) {
-        val hourTickInterval = if(picker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) 24 else 12
+        val hourTickInterval =
+            if (picker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) 24 else 12
         val tickLength = picker._tickLength
         val tickCount = picker._tickCount
         val hourTick = tickCount / hourTickInterval
-        val offset = if(picker.clockLabelSize.dp <= 16) 3 else 6
+        val offset = if (picker.clockLabelSize.dp <= 16) 3 else 6
         val anglePerTick = 360f / tickCount
 
         for (i in 0 until tickCount) {
@@ -120,11 +121,12 @@ object DefaultClockRenderer: ClockRenderer {
             val stopY = _middle.y + stopRadius * sinAngle
 
             if (picker.clockFace == TimeRangePicker.ClockFace.SAMSUNG &&
-                ((angle >= 90-offset && angle <= 90+offset) ||
-                        (angle >= 180-offset && angle <= 180+offset) ||
-                        (angle >= 270-offset && angle <= 270+offset) ||
-                        angle >= 360-offset ||
-                        angle <= 0+offset)) {
+                ((angle >= 90 - offset && angle <= 90 + offset) ||
+                        (angle >= 180 - offset && angle <= 180 + offset) ||
+                        (angle >= 270 - offset && angle <= 270 + offset) ||
+                        angle >= 360 - offset ||
+                        angle <= 0 + offset)
+            ) {
                 continue
             }
 
@@ -147,9 +149,9 @@ object DefaultClockRenderer: ClockRenderer {
         val sinTable: FloatArray
         val cosTable: FloatArray
 
-        when(picker.clockFace) {
+        when (picker.clockFace) {
             TimeRangePicker.ClockFace.APPLE -> {
-                labels =  if (picker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) {
+                labels = if (picker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) {
                     LABELS_APPLE_24
                 } else {
                     LABELS_APPLE_12
@@ -158,7 +160,7 @@ object DefaultClockRenderer: ClockRenderer {
                 cosTable = COS_TABLE_LABELS_APPLE
             }
             TimeRangePicker.ClockFace.SAMSUNG -> {
-                labels =  if (picker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) {
+                labels = if (picker.hourFormat == TimeRangePicker.HourFormat.FORMAT_24) {
                     LABELS_SAMSUNG_24
                 } else {
                     LABELS_SAMSUNG_12
