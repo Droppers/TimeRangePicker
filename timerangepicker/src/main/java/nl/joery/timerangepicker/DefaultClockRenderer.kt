@@ -2,8 +2,8 @@ package nl.joery.timerangepicker
 
 import android.graphics.*
 import androidx.annotation.Keep
-import nl.joery.timerangepicker.utils.dp
-import nl.joery.timerangepicker.utils.px
+import nl.joery.timerangepicker.utils.dpToPx
+import nl.joery.timerangepicker.utils.pxToDp
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -15,14 +15,17 @@ object DefaultClockRenderer: ClockRenderer {
     private val LABELS_SAMSUNG_24 = arrayOf("0", "6", "12", "18")
     private val LABELS_SAMSUNG_12 = arrayOf("12", "3", "6", "9")
 
-    private val _minuteTickWidth = 1.px
-    private val _hourTickWidth = 2.px
+    private val _minuteTickWidth = dpToPx(1f)
+    private val _hourTickWidth = dpToPx(2f)
     private val _middle = PointF(0f, 0f)
 
-    private val TimeRangePicker._tickLength
-        get() = when (clockFace) {
-            TimeRangePicker.ClockFace.APPLE -> 6.px
-            TimeRangePicker.ClockFace.SAMSUNG -> 4.px
+    private val TimeRangePicker._tickLength: Float
+        get() {
+            val dp = when(clockFace) {
+                TimeRangePicker.ClockFace.APPLE -> 6f
+                TimeRangePicker.ClockFace.SAMSUNG -> 4f
+            }
+            return dpToPx(dp)
         }
 
     private val TimeRangePicker._tickCount: Int
@@ -58,7 +61,7 @@ object DefaultClockRenderer: ClockRenderer {
         val tickLength = picker._tickLength
         val tickCount = picker._tickCount
         val hourTick = tickCount / hourTickInterval
-        val offset = if(picker.clockLabelSize.dp <= 16) 3 else 6
+        val offset = if(pxToDp(picker.clockLabelSize.toFloat()) <= 16) 3 else 6
         val anglePerTick = 360f / tickCount
 
         for (i in 0 until tickCount) {
@@ -87,10 +90,10 @@ object DefaultClockRenderer: ClockRenderer {
             // Hour tick
             if (i % hourTick == 0) {
                 _tickPaint.alpha = 180
-                _tickPaint.strokeWidth = _hourTickWidth.toFloat()
+                _tickPaint.strokeWidth = _hourTickWidth
             } else {
                 _tickPaint.alpha = 100
-                _tickPaint.strokeWidth = _minuteTickWidth.toFloat()
+                _tickPaint.strokeWidth = _minuteTickWidth
             }
             canvas.drawLine(startX, startY, stopX, stopY, _tickPaint)
         }
@@ -119,7 +122,7 @@ object DefaultClockRenderer: ClockRenderer {
 
         val bounds = _drawLabelsBounds
         val position = _drawLabelsPosition
-        val tickLength = picker._tickLength.toFloat()
+        val tickLength = picker._tickLength
 
         for (i in labels.indices) {
             val label = labels[i]

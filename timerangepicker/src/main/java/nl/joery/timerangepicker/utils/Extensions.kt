@@ -7,6 +7,15 @@ import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 
+private val displayMetrics = Resources.getSystem().displayMetrics
+private val density = displayMetrics.density
+private val invDensity = 1f / density
+private val sDensity = displayMetrics.scaledDensity
+
+fun dpToPx(value: Float): Float = value * density
+fun pxToDp(value: Float): Float = value * invDensity
+fun spToPx(value: Float): Float = value * sDensity
+
 @ColorInt
 internal fun Context.getColorResCompat(@AttrRes id: Int): Int {
     return ContextCompat.getColor(this, getResourceId(id))
@@ -31,16 +40,3 @@ internal fun Context.getResourceId(id: Int): Int {
     theme.resolveAttribute(id, resolvedAttr, true)
     return resolvedAttr.run { if (resourceId != 0) resourceId else data }
 }
-
-internal val Int.px: Int
-    get() = (this * Resources.getSystem().displayMetrics.density).toInt()
-
-internal val Int.dp: Int
-    get() = (this / Resources.getSystem().displayMetrics.density).toInt()
-
-internal val Int.sp: Int
-    get() = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_SP,
-        this.toFloat(),
-        Resources.getSystem().displayMetrics
-    ).toInt()
