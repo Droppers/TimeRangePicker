@@ -293,7 +293,7 @@ class TimeRangePicker @JvmOverloads constructor(
             _sliderRangePaint.shader = null
         }
 
-        postInvalidate()
+        invalidate()
     }
 
     private fun updateGradient() {
@@ -363,7 +363,7 @@ class TimeRangePicker @JvmOverloads constructor(
             }
         }
 
-        postInvalidate()
+        invalidate()
     }
 
     public override fun onSaveInstanceState(): Parcelable {
@@ -563,7 +563,7 @@ class TimeRangePicker @JvmOverloads constructor(
                         touchAngle
                     )
 
-                    postInvalidate()
+                    invalidate()
 
                     return onDragChangeListener?.onDragStart(_activeThumb!!) ?: true
                 } else {
@@ -619,7 +619,7 @@ class TimeRangePicker @JvmOverloads constructor(
                 }
 
                 anglesChanged(_activeThumb!!)
-                postInvalidate()
+                invalidate()
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -633,7 +633,7 @@ class TimeRangePicker @JvmOverloads constructor(
                 )
 
                 updateGradient()
-                postInvalidate()
+                invalidate()
 
                 onDragChangeListener?.onDragStop(_activeThumb!!)
                 _activeThumb = Thumb.NONE
@@ -738,7 +738,7 @@ class TimeRangePicker @JvmOverloads constructor(
             _angleEnd = minutesToAngle(angleToMinutes(_angleEnd, prevFormat), _hourFormat)
 
             updateGradient()
-            postInvalidate()
+            invalidate()
         }
 
     var startTime: Time
@@ -747,7 +747,7 @@ class TimeRangePicker @JvmOverloads constructor(
         )
         set(value) {
             _angleStart = minutesToAngle(value.totalMinutes, _hourFormat)
-            postInvalidate()
+            invalidate()
         }
 
     var startTimeMinutes: Int
@@ -756,7 +756,7 @@ class TimeRangePicker @JvmOverloads constructor(
         )
         set(value) {
             _angleStart = minutesToAngle(value, _hourFormat)
-            postInvalidate()
+            invalidate()
         }
 
     var endTime: Time
@@ -765,7 +765,7 @@ class TimeRangePicker @JvmOverloads constructor(
         )
         set(value) {
             _angleEnd = minutesToAngle(value.totalMinutes, _hourFormat)
-            postInvalidate()
+            invalidate()
         }
 
     var endTimeMinutes: Int
@@ -774,7 +774,7 @@ class TimeRangePicker @JvmOverloads constructor(
         )
         set(value) {
             _angleEnd = minutesToAngle(value, _hourFormat)
-            postInvalidate()
+            invalidate()
         }
 
     val duration: TimeDuration
@@ -807,7 +807,7 @@ class TimeRangePicker @JvmOverloads constructor(
                     endTimeMinutes + abs(durationMinutes - _maxDurationMinutes),
                     _hourFormat
                 )
-                postInvalidate()
+                invalidate()
             }
         }
 
@@ -835,7 +835,7 @@ class TimeRangePicker @JvmOverloads constructor(
                     endTimeMinutes - abs(durationMinutes - _maxDurationMinutes),
                     _hourFormat
                 )
-                postInvalidate()
+                invalidate()
             }
         }
 
@@ -847,7 +847,7 @@ class TimeRangePicker @JvmOverloads constructor(
             }
 
             _stepTimeMinutes = value
-            postInvalidate()
+            invalidate()
         }
 
     // Slider
@@ -947,7 +947,7 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _thumbSizeActiveGrow
         set(value) {
             _thumbSizeActiveGrow = value
-            postInvalidate()
+            invalidate()
         }
 
     var thumbColor
@@ -1005,7 +1005,7 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _thumbIconSize
         set(@ColorInt value) {
             _thumbIconSize = value
-            postInvalidate()
+            invalidate()
         }
 
     var thumbIconColor
@@ -1028,14 +1028,14 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockVisible
         set(value) {
             _clockVisible = value
-            postInvalidate()
+            invalidate()
         }
 
     var clockFace
         get() = _clockFace
         set(value) {
             _clockFace = value
-            postInvalidate()
+            invalidate()
         }
 
     var clockTickColor
@@ -1043,7 +1043,7 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockTickColor
         set(@ColorInt value) {
             _clockTickColor = value
-            postInvalidate()
+            invalidate()
         }
 
     var clockTickColorRes
@@ -1058,7 +1058,7 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockLabelColor
         set(@ColorInt value) {
             _clockLabelColor = value
-            postInvalidate()
+            invalidate()
         }
 
     var clockLabelColorRes
@@ -1073,7 +1073,7 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockLabelSize
         set(@Dimension value) {
             _clockLabelSize = value
-            postInvalidate()
+            invalidate()
         }
 
     open class Time(val totalMinutes: Int) {
