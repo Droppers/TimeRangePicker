@@ -283,18 +283,9 @@ The attributes listed below can be used to configure the look and feel of the pi
             <br/> 
             Note that, you should add <b>@Keep</b> annotation to your custom renderer class.
             <br/>
-            There are some requirements which should be met.
-            <br/>
-            The renderer class should have a public constructor with no parameters.
+            The renderer class should have a public constructor with one parameter: TimeRangePicker.
             <br/>
             Then renderer will be created through calling that constructor.
-            <br/>
-            Or the class should have non-null <b>public static final INSTANCE</b> field. 
-            <br/>
-            The value of the field should extend <b>ClockRenderer</b> 
-            <br/>
-            If the class contains both public constructor and <b>INSTANCE</b> field,
-            the way through calling constructor is preferred
         </td>
         <td>nl.joery.timerangepicker.DefaultClockRenderer</td>
     </tr>
