@@ -29,11 +29,12 @@ import java.time.LocalTime
 import java.util.*
 import javax.xml.datatype.DatatypeFactory
 import kotlin.math.*
+import kotlin.properties.Delegates
 
 class TimeRangePicker @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-    private var _clockRenderer: ClockRenderer = DefaultClockRenderer
+    private var _clockRenderer: ClockRenderer = DefaultClockRenderer(this)
     private val _thumbStartPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val _thumbEndPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
@@ -103,12 +104,16 @@ class TimeRangePicker @JvmOverloads constructor(
     private var _gradientColorsCache = IntArray(2)
     private val _gradientMatrixCache = Matrix()
 
+    private var _clockRadius: Float = 0f
+
     init {
         initColors()
         initAttributes(attrs)
 
         updateMiddlePoint()
         updatePaint()
+
+        computeClockRadius(invalidate = false)
     }
 
     private fun initColors() {
@@ -121,6 +126,8 @@ class TimeRangePicker @JvmOverloads constructor(
             _sliderRangeColor = Color.BLUE
             _thumbColor = Color.BLUE
         }
+
+        _sliderColor = 0xFFE1E1E1.toInt()
 
         val textColorPrimary = context.getTextColor(android.R.attr.textColorPrimary)
 
@@ -135,12 +142,13 @@ class TimeRangePicker @JvmOverloads constructor(
             context.obtainStyledAttributes(attributeSet, R.styleable.TimeRangePicker, 0, 0)
         try {
             // Time
+            // Sets public property to determine 24 / 12 format automatically
             hourFormat = HourFormat.fromId(
                 attr.getInt(
                     R.styleable.TimeRangePicker_trp_hourFormat,
                     _hourFormat.id
                 )
-            ) ?: _hourFormat // Sets public property to determine 24 / 12 format automatically
+            )
             _angleStart = minutesToAngle(
                 attr.getInt(
                     R.styleable.TimeRangePicker_trp_endTimeMinutes,
@@ -234,7 +242,7 @@ class TimeRangePicker @JvmOverloads constructor(
                     R.styleable.TimeRangePicker_trp_clockFace,
                     _clockFace.id
                 )
-            ) ?: _clockFace
+            )
 
             _clockLabelSize = attr.getDimensionPixelSize(
                 R.styleable.TimeRangePicker_trp_clockLabelSize,
@@ -250,7 +258,7 @@ class TimeRangePicker @JvmOverloads constructor(
             val clockRendererClassName =
                 attr.getString(R.styleable.TimeRangePicker_trp_clockRenderer)
             if (clockRendererClassName != null) {
-                _clockRenderer = createClockRenderer(clockRendererClassName)
+                _clockRenderer = createClockRenderer(clockRendererClassName, this)
             }
         } finally {
             attr.recycle()
@@ -261,7 +269,7 @@ class TimeRangePicker @JvmOverloads constructor(
         _middlePoint.set(width / 2f, height / 2f)
     }
 
-    private fun updatePaint() {
+    private fun updatePaint(invalidate: Boolean = true) {
         _thumbStartPaint.style = Paint.Style.FILL
         _thumbEndPaint.style = Paint.Style.FILL
 
@@ -290,7 +298,9 @@ class TimeRangePicker @JvmOverloads constructor(
             _sliderRangePaint.shader = null
         }
 
-        postInvalidate()
+        if (invalidate) {
+            invalidate()
+        }
     }
 
     private fun updateGradient() {
@@ -363,7 +373,7 @@ class TimeRangePicker @JvmOverloads constructor(
             }
         }
 
-        postInvalidate()
+        invalidate()
     }
 
     public override fun onSaveInstanceState(): Parcelable {
@@ -388,6 +398,7 @@ class TimeRangePicker @JvmOverloads constructor(
 
         updateMiddlePoint()
         updateGradient()
+        computeClockRadius()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -404,8 +415,7 @@ class TimeRangePicker @JvmOverloads constructor(
         super.onDraw(canvas)
 
         if (_clockVisible) {
-            val radius = _radius - max(_thumbSize, _sliderWidth) / 2f - 8.px
-            _clockRenderer.render(canvas, this, radius)
+            _clockRenderer.render(canvas)
         }
 
         _sliderRect.set(
@@ -567,7 +577,7 @@ class TimeRangePicker @JvmOverloads constructor(
                         touchAngle
                     )
 
-                    postInvalidate()
+                    invalidate()
 
                     return onDragChangeListener?.onDragStart(_activeThumb) ?: true
                 } else {
@@ -623,7 +633,7 @@ class TimeRangePicker @JvmOverloads constructor(
                 }
 
                 anglesChanged(_activeThumb)
-                postInvalidate()
+                invalidate()
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -637,7 +647,7 @@ class TimeRangePicker @JvmOverloads constructor(
                 )
 
                 updateGradient()
-                postInvalidate()
+                invalidate()
 
                 onDragChangeListener?.onDragStop(_activeThumb)
                 _activeThumb = Thumb.NONE
@@ -720,10 +730,37 @@ class TimeRangePicker @JvmOverloads constructor(
         this.onDragChangeListener = onDragChangeListener
     }
 
+    private fun computeClockRadius(invalidate: Boolean = true) {
+        _clockRadius = _radius - max(_thumbSize, _sliderWidth) / 2f - 8.px
+        invalidateBitmapCache()
+
+        if(invalidate) {
+            invalidate()
+        }
+    }
+
+    private fun invalidateBitmapCache() {
+        val renderer = _clockRenderer
+        if(renderer is BitmapCachedClockRenderer && renderer.isBitmapCacheEnabled) {
+            renderer.invalidateBitmapCache()
+        }
+    }
+
+    val clockRadius: Float
+        get() = _clockRadius
+
     var clockRenderer: ClockRenderer
         get() = _clockRenderer
         set(value) {
+            val oldRenderer = _clockRenderer
+            if(oldRenderer is BitmapCachedClockRenderer) {
+                oldRenderer.recycleBitmapCache()
+            }
+
             _clockRenderer = value
+            if(value is BitmapCachedClockRenderer) {
+                value.invalidateBitmapCache()
+            }
             invalidate()
         }
 
@@ -743,7 +780,8 @@ class TimeRangePicker @JvmOverloads constructor(
             _angleEnd = minutesToAngle(angleToMinutes(_angleEnd, prevFormat), _hourFormat)
 
             updateGradient()
-            postInvalidate()
+            invalidateBitmapCache()
+            invalidate()
         }
 
     var startTime: Time
@@ -752,7 +790,7 @@ class TimeRangePicker @JvmOverloads constructor(
         )
         set(value) {
             _angleStart = minutesToAngle(value.totalMinutes, _hourFormat)
-            postInvalidate()
+            invalidate()
         }
 
     var startTimeMinutes: Int
@@ -761,7 +799,7 @@ class TimeRangePicker @JvmOverloads constructor(
         )
         set(value) {
             _angleStart = minutesToAngle(value, _hourFormat)
-            postInvalidate()
+            invalidate()
         }
 
     var endTime: Time
@@ -770,7 +808,7 @@ class TimeRangePicker @JvmOverloads constructor(
         )
         set(value) {
             _angleEnd = minutesToAngle(value.totalMinutes, _hourFormat)
-            postInvalidate()
+            invalidate()
         }
 
     var endTimeMinutes: Int
@@ -779,7 +817,7 @@ class TimeRangePicker @JvmOverloads constructor(
         )
         set(value) {
             _angleEnd = minutesToAngle(value, _hourFormat)
-            postInvalidate()
+            invalidate()
         }
 
     val duration: TimeDuration
@@ -812,7 +850,7 @@ class TimeRangePicker @JvmOverloads constructor(
                     endTimeMinutes + abs(durationMinutes - _maxDurationMinutes),
                     _hourFormat
                 )
-                postInvalidate()
+                invalidate()
             }
         }
 
@@ -840,7 +878,7 @@ class TimeRangePicker @JvmOverloads constructor(
                     endTimeMinutes - abs(durationMinutes - _maxDurationMinutes),
                     _hourFormat
                 )
-                postInvalidate()
+                invalidate()
             }
         }
 
@@ -852,7 +890,7 @@ class TimeRangePicker @JvmOverloads constructor(
             }
 
             _stepTimeMinutes = value
-            postInvalidate()
+            invalidate()
         }
 
     // Slider
@@ -861,6 +899,7 @@ class TimeRangePicker @JvmOverloads constructor(
         set(@ColorInt value) {
             _sliderWidth = value
             updatePaint()
+            computeClockRadius()
         }
 
     var sliderColor
@@ -945,14 +984,15 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _thumbSize
         set(@ColorInt value) {
             _thumbSize = value
-            updatePaint()
+            updatePaint(invalidate = false)
+            computeClockRadius()
         }
 
     var thumbSizeActiveGrow
         get() = _thumbSizeActiveGrow
         set(value) {
             _thumbSizeActiveGrow = value
-            postInvalidate()
+            computeClockRadius()
         }
 
     var thumbColor: Int?
@@ -1010,7 +1050,7 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = if(_thumbIconSize == -1) null else _thumbIconSize
         set(value) {
             _thumbIconSize = value ?: -1
-            postInvalidate()
+            invalidate()
         }
 
     var thumbIconColor: Int?
@@ -1033,14 +1073,15 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockVisible
         set(value) {
             _clockVisible = value
-            postInvalidate()
+            invalidate()
         }
 
     var clockFace
         get() = _clockFace
         set(value) {
             _clockFace = value
-            postInvalidate()
+            invalidateBitmapCache()
+            invalidate()
         }
 
     var clockTickColor: Int
@@ -1048,7 +1089,8 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockTickColor
         set(@ColorInt value) {
             _clockTickColor = value
-            postInvalidate()
+            invalidateBitmapCache()
+            invalidate()
         }
 
     var clockTickColorRes
@@ -1063,7 +1105,8 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockLabelColor
         set(@ColorInt value) {
             _clockLabelColor = value
-            postInvalidate()
+            invalidateBitmapCache()
+            invalidate()
         }
 
     var clockLabelColorRes
@@ -1078,7 +1121,8 @@ class TimeRangePicker @JvmOverloads constructor(
         get() = _clockLabelSize
         set(@Dimension value) {
             _clockLabelSize = value
-            postInvalidate()
+            invalidateBitmapCache()
+            invalidate()
         }
 
     @ColorInt
@@ -1184,7 +1228,7 @@ class TimeRangePicker @JvmOverloads constructor(
         FORMAT_24(2);
 
         companion object {
-            fun fromId(id: Int): HourFormat? {
+            fun fromId(id: Int): HourFormat {
                 for (f in values()) {
                     if (f.id == id) return f
                 }
@@ -1198,7 +1242,7 @@ class TimeRangePicker @JvmOverloads constructor(
         SAMSUNG(1);
 
         companion object {
-            fun fromId(id: Int): ClockFace? {
+            fun fromId(id: Int): ClockFace {
                 for (f in values()) {
                     if (f.id == id) return f
                 }
