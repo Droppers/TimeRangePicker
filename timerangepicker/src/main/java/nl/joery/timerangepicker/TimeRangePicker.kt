@@ -141,12 +141,13 @@ class TimeRangePicker @JvmOverloads constructor(
             context.obtainStyledAttributes(attributeSet, R.styleable.TimeRangePicker, 0, 0)
         try {
             // Time
+            // Sets public property to determine 24 / 12 format automatically
             hourFormat = HourFormat.fromId(
                 attr.getInt(
                     R.styleable.TimeRangePicker_trp_hourFormat,
                     _hourFormat.id
                 )
-            ) ?: _hourFormat // Sets public property to determine 24 / 12 format automatically
+            )
             _angleStart = minutesToAngle(
                 attr.getInt(
                     R.styleable.TimeRangePicker_trp_endTimeMinutes,
@@ -241,7 +242,7 @@ class TimeRangePicker @JvmOverloads constructor(
                     R.styleable.TimeRangePicker_trp_clockFace,
                     _clockFace.id
                 )
-            ) ?: _clockFace
+            )
 
             _clockLabelSize = attr.getDimensionPixelSize(
                 R.styleable.TimeRangePicker_trp_clockLabelSize,
@@ -1212,7 +1213,7 @@ class TimeRangePicker @JvmOverloads constructor(
         FORMAT_24(2);
 
         companion object {
-            fun fromId(id: Int): HourFormat? {
+            fun fromId(id: Int): HourFormat {
                 for (f in values()) {
                     if (f.id == id) return f
                 }
@@ -1226,7 +1227,7 @@ class TimeRangePicker @JvmOverloads constructor(
         SAMSUNG(1);
 
         companion object {
-            fun fromId(id: Int): ClockFace? {
+            fun fromId(id: Int): ClockFace {
                 for (f in values()) {
                     if (f.id == id) return f
                 }
