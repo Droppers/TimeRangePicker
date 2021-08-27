@@ -934,11 +934,11 @@ class TimeRangePicker @JvmOverloads constructor(
             sliderRangeColor = ContextCompat.getColor(context, value)
         }
 
-    var sliderRangeGradientStart: Int?
+    var sliderRangeGradientStart: Int
         @ColorInt
-        get() = _sliderRangeGradientStart.nullIfNone()
+        get() = _sliderRangeGradientStart
         set(@ColorInt value) {
-            _sliderRangeGradientStart = value ?: COLOR_NONE
+            _sliderRangeGradientStart = value
             updatePaint()
         }
 
@@ -949,11 +949,11 @@ class TimeRangePicker @JvmOverloads constructor(
             sliderRangeGradientStart = ContextCompat.getColor(context, value)
         }
 
-    var sliderRangeGradientMiddle: Int?
+    var sliderRangeGradientMiddle: Int
         @ColorInt
-        get() = _sliderRangeGradientMiddle.nullIfNone()
+        get() = _sliderRangeGradientMiddle
         set(@ColorInt value) {
-            _sliderRangeGradientMiddle = value ?: COLOR_NONE
+            _sliderRangeGradientMiddle = value
             updatePaint()
         }
 
@@ -964,11 +964,11 @@ class TimeRangePicker @JvmOverloads constructor(
             sliderRangeGradientMiddle = ContextCompat.getColor(context, value)
         }
 
-    var sliderRangeGradientEnd: Int?
+    var sliderRangeGradientEnd: Int
         @ColorInt
-        get() = _sliderRangeGradientEnd.nullIfNone()
+        get() = _sliderRangeGradientEnd
         set(@ColorInt value) {
-            _sliderRangeGradientEnd = value ?: COLOR_NONE
+            _sliderRangeGradientEnd = value
             updatePaint()
         }
 
@@ -995,11 +995,11 @@ class TimeRangePicker @JvmOverloads constructor(
             computeClockRadius()
         }
 
-    var thumbColor: Int?
+    var thumbColor: Int
         @ColorInt
-        get() = _thumbColor.nullIfNone()
+        get() = _thumbColor
         set(@ColorInt value) {
-            _thumbColor = value ?: COLOR_NONE
+            _thumbColor = value
             _thumbColorAuto = false
             updatePaint()
         }
@@ -1046,18 +1046,18 @@ class TimeRangePicker @JvmOverloads constructor(
             thumbIconEnd = ContextCompat.getDrawable(context, value)
         }
 
-    var thumbIconSize: Int?
-        get() = if(_thumbIconSize == -1) null else _thumbIconSize
+    var thumbIconSize: Int
+        get() = _thumbIconSize
         set(value) {
-            _thumbIconSize = value ?: -1
+            _thumbIconSize = value
             invalidate()
         }
 
-    var thumbIconColor: Int?
+    var thumbIconColor: Int
         @ColorInt
-        get() = _thumbIconColor.nullIfNone()
+        get() = _thumbIconColor
         set(@ColorInt value) {
-            _thumbIconColor = value ?: COLOR_NONE
+            _thumbIconColor = value
             updateThumbIconColors()
         }
 
@@ -1124,9 +1124,6 @@ class TimeRangePicker @JvmOverloads constructor(
             invalidateBitmapCache()
             invalidate()
         }
-
-    @ColorInt
-    private fun Int.nullIfNone(): Int? = if(this == COLOR_NONE) null else this
 
     companion object {
         private const val COLOR_NONE: Int = 0x00c0ffee
