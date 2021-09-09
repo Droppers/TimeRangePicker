@@ -45,14 +45,14 @@ class TimeRangePicker @JvmOverloads constructor(
     private val _sliderRect: RectF = RectF()
     private val _sliderCapRect: RectF = RectF()
 
-    private var _sliderWidth: Int = 8.px
+    private var _sliderWidth: Int = dpToPx(8f).toInt()
     private var _sliderColor by Delegates.notNull<Int>()
     private var _sliderRangeColor by Delegates.notNull<Int>()
     private var _sliderRangeGradientStart: Int? = null
     private var _sliderRangeGradientMiddle: Int? = null
     private var _sliderRangeGradientEnd: Int? = null
 
-    private var _thumbSize: Int = 28.px
+    private var _thumbSize: Int = dpToPx(28f).toInt()
     private var _thumbSizeActiveGrow: Float = 1.2f
     private var _thumbIconStart: Drawable? = null
     private var _thumbIconEnd: Drawable? = null
@@ -63,7 +63,7 @@ class TimeRangePicker @JvmOverloads constructor(
 
     private var _clockVisible: Boolean = true
     private var _clockFace: ClockFace = ClockFace.APPLE
-    private var _clockLabelSize = 15.sp
+    private var _clockLabelSize = spToPx(15f).toInt()
     private var _clockLabelColor by Delegates.notNull<Int>()
     private var _clockTickColor by Delegates.notNull<Int>()
 
@@ -299,7 +299,7 @@ class TimeRangePicker @JvmOverloads constructor(
         }
 
         if (invalidate) {
-            invalidate(
+            invalidate()
         }
     }
 
@@ -540,7 +540,7 @@ class TimeRangePicker @JvmOverloads constructor(
 
         if (icon != null) {
             val iconSize =
-                _thumbIconSize?.toFloat() ?: min(24.px.toFloat(), _thumbSize * 0.625f)
+                _thumbIconSize?.toFloat() ?: min(dpToPx(24f), _thumbSize * 0.625f)
             icon.setBounds(
                 (x - iconSize / 2).toInt(),
                 (y - iconSize / 2).toInt(),
@@ -723,7 +723,7 @@ class TimeRangePicker @JvmOverloads constructor(
     }
 
     private fun computeClockRadius(invalidate: Boolean = true) {
-        _clockRadius = _radius - max(_thumbSize, _sliderWidth) / 2f - 8.px
+        _clockRadius = _radius - max(_thumbSize, _sliderWidth) / 2f - dpToPx(8f)
         invalidateBitmapCache()
 
         if(invalidate) {
