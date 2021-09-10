@@ -1124,7 +1124,7 @@ class TimeRangePicker @JvmOverloads constructor(
         }
 
     companion object {
-        private const val COLOR_NONE: Int = 0x00c0ffee
+        const val COLOR_NONE: Int = 0x00c0ffee
     }
 
     open class Time(val totalMinutes: Int) {
