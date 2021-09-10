@@ -4,15 +4,15 @@ import android.graphics.*
 import android.os.Build
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
-import nl.joery.timerangepicker.utils.dp
-import nl.joery.timerangepicker.utils.px
+import nl.joery.timerangepicker.utils.dpToPx
+import nl.joery.timerangepicker.utils.pxToDp
 import kotlin.math.cos
 import kotlin.math.sin
 
 @Keep
 class DefaultClockRenderer(private val picker: TimeRangePicker): BitmapCachedClockRenderer {
-    private val _minuteTickWidth = 1.px
-    private val _hourTickWidth = 2.px
+    private val _minuteTickWidth = dpToPx(1f)
+    private val _hourTickWidth = dpToPx(2f)
     private var _middle: Float = 0f
 
     private var _bitmapCache: Bitmap? = null
@@ -30,10 +30,13 @@ class DefaultClockRenderer(private val picker: TimeRangePicker): BitmapCachedClo
             }
         }
 
-    private val _tickLength
-        get() = when (picker.clockFace) {
-            TimeRangePicker.ClockFace.APPLE -> 6.px
-            TimeRangePicker.ClockFace.SAMSUNG -> 4.px
+    private val _tickLength: Float
+        get() {
+            val dp = when(picker.clockFace) {
+                TimeRangePicker.ClockFace.APPLE -> 6f
+                TimeRangePicker.ClockFace.SAMSUNG -> 4f
+            }
+            return dpToPx(dp)
         }
 
     private val _tickCount: Int
@@ -46,7 +49,6 @@ class DefaultClockRenderer(private val picker: TimeRangePicker): BitmapCachedClo
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
-
     private val _labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textAlign = Paint.Align.CENTER
     }
@@ -140,7 +142,7 @@ class DefaultClockRenderer(private val picker: TimeRangePicker): BitmapCachedClo
         val tickLength = _tickLength
         val tickCount = _tickCount
         val hourTick = tickCount / hourTickInterval
-        val offset = if(picker.clockLabelSize.dp <= 16) 3 else 6
+        val offset = if(pxToDp(picker.clockLabelSize.toFloat()) <= 16) 3 else 6
         val anglePerTick = 360f / tickCount
 
         for (i in 0 until tickCount) {
@@ -169,10 +171,10 @@ class DefaultClockRenderer(private val picker: TimeRangePicker): BitmapCachedClo
             // Hour tick
             if (i % hourTick == 0) {
                 _tickPaint.alpha = 180
-                _tickPaint.strokeWidth = _hourTickWidth.toFloat()
+                _tickPaint.strokeWidth = _hourTickWidth
             } else {
                 _tickPaint.alpha = 100
-                _tickPaint.strokeWidth = _minuteTickWidth.toFloat()
+                _tickPaint.strokeWidth = _minuteTickWidth
             }
             canvas.drawLine(startX, startY, stopX, stopY, _tickPaint)
         }
@@ -201,7 +203,7 @@ class DefaultClockRenderer(private val picker: TimeRangePicker): BitmapCachedClo
 
         val bounds = _drawLabelsBounds
         val position = _drawLabelsPosition
-        val tickLength = _tickLength.toFloat()
+        val tickLength = _tickLength
         val radius = picker.clockRadius
 
         for (i in labels.indices) {

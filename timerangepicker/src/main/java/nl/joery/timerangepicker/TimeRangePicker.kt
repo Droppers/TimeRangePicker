@@ -29,7 +29,6 @@ import java.time.LocalTime
 import java.util.*
 import javax.xml.datatype.DatatypeFactory
 import kotlin.math.*
-import kotlin.properties.Delegates
 
 class TimeRangePicker @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -45,7 +44,7 @@ class TimeRangePicker @JvmOverloads constructor(
     private val _sliderRect: RectF = RectF()
     private val _sliderCapRect: RectF = RectF()
 
-    private var _sliderWidth: Int = 8.px
+    private var _sliderWidth: Int = dpToPx(8f).toInt()
     private var _sliderColor: Int = 0xFFE1E1E1.toInt()
     private var _sliderRangeColor: Int = COLOR_NONE
 
@@ -53,7 +52,7 @@ class TimeRangePicker @JvmOverloads constructor(
     private var _sliderRangeGradientMiddle: Int = COLOR_NONE
     private var _sliderRangeGradientEnd: Int = COLOR_NONE
 
-    private var _thumbSize: Int = 28.px
+    private var _thumbSize: Int = dpToPx(28f).toInt()
     private var _thumbSizeActiveGrow: Float = 1.2f
     private var _thumbIconStart: Drawable? = null
     private var _thumbIconEnd: Drawable? = null
@@ -64,7 +63,7 @@ class TimeRangePicker @JvmOverloads constructor(
 
     private var _clockVisible: Boolean = true
     private var _clockFace: ClockFace = ClockFace.APPLE
-    private var _clockLabelSize = 15.sp
+    private var _clockLabelSize = spToPx(15f).toInt()
     private var _clockLabelColor: Int = COLOR_NONE
     private var _clockTickColor: Int = COLOR_NONE
 
@@ -545,9 +544,8 @@ class TimeRangePicker @JvmOverloads constructor(
             val iconSize = if(_thumbIconSize != -1) {
                 _thumbIconSize.toFloat()
             } else {
-                min(24.px.toFloat(), _thumbSize * 0.625f)
+                min(dpToPx(24f), _thumbSize * 0.625f)
             }
-
             icon.setBounds(
                 (x - iconSize / 2).toInt(),
                 (y - iconSize / 2).toInt(),
@@ -731,7 +729,7 @@ class TimeRangePicker @JvmOverloads constructor(
     }
 
     private fun computeClockRadius(invalidate: Boolean = true) {
-        _clockRadius = _radius - max(_thumbSize, _sliderWidth) / 2f - 8.px
+        _clockRadius = _radius - max(_thumbSize, _sliderWidth) / 2f - dpToPx(8f)
         invalidateBitmapCache()
 
         if(invalidate) {
