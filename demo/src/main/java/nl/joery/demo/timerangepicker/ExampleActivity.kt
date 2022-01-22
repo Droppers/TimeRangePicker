@@ -121,7 +121,7 @@ class ExampleActivity : AppCompatActivity() {
                 picker.sliderColor = Color.TRANSPARENT
                 picker.thumbColor = Color.WHITE
                 picker.sliderRangeGradientStart = Color.parseColor("#F79104")
-                picker.sliderRangeGradientMiddle = null
+                picker.sliderRangeGradientMiddle = TimeRangePicker.COLOR_NONE
                 picker.sliderRangeGradientEnd = Color.parseColor("#F8C207")
                 picker.thumbIconColor = Color.parseColor("#F79104")
                 picker.thumbSizeActiveGrow = 1.0f
@@ -135,7 +135,7 @@ class ExampleActivity : AppCompatActivity() {
                 picker.thumbColor = Color.TRANSPARENT
                 picker.thumbIconColor = Color.WHITE
                 picker.sliderRangeGradientStart = Color.parseColor("#5663de")
-                picker.sliderRangeGradientMiddle = null
+                picker.sliderRangeGradientMiddle = TimeRangePicker.COLOR_NONE
                 picker.sliderRangeGradientEnd = Color.parseColor("#6d7bff")
                 picker.thumbSizeActiveGrow = 1.0f
                 picker.clockFace = TimeRangePicker.ClockFace.SAMSUNG
