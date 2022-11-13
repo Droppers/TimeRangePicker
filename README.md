@@ -183,7 +183,7 @@ The attributes listed below can be used to configure the look and feel of the pi
     </tr>
     </tr>
         <tr>
-        <td><b>trp_sliderRangeGradientStart</b></td>
+        <td><b>trp_sliderRangeGradientMiddle</b></td>
     <td>Optional for gradient: set the middle gradient color of the active part of the slider wheel.</td>
         <td></td>
     </tr>
